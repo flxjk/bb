@@ -42,6 +42,7 @@ out
 
 # temporary scripts
 .tmp/
+.tmp-build/
 
 # debug
 npm-debug.log*
