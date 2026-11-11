@@ -1,0 +1,16 @@
+{
+  "name": "bb-openai-sdk-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Runnable scripts for the official OpenAI and OpenRouter SDKs: cloud by API key, and any OpenAI-compatible endpoint by base URL.",
+  "scripts": {
+    "openai": "node openai.mjs",
+    "openrouter": "node openrouter.mjs",
+    "models": "node models.mjs",
+    "evals": "node evals.mjs"
+  },
+  "dependencies": {
+    "@openrouter/sdk": "^1.5.83",
+    "openai": "^7.55.0"
+  }
+}
