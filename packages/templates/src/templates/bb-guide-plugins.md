@@ -242,10 +242,10 @@ update also updates the bundled copy.
 `bb-community` lists reviewed plugins that live outside the app bundle, read
 from https://getbb.app/marketplace/v2/marketplace.json at startup and every two
 hours. Set BB_MARKETPLACE_URL (read at startup) to override the URL. An invalid
-manifest keeps the last valid catalog. `bb plugin search` shows install counts
-that bb measures through anonymous telemetry, so they undercount; third-party
-marketplaces have none. Builtins show "Built in", and a plugin under 25
-installs that was published in the last 30 days shows "New".
+manifest keeps the last valid catalog. `bb plugin search` shows the install
+counts the marketplace catalog reports; third-party marketplaces have none.
+Builtins show "Built in", and a plugin under 25 installs that was published in
+the last 30 days shows "New".
 `bb plugin search --json` returns the raw `installs`, `installedByDefault`,
 and long-form `overview` fields.
 

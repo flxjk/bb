@@ -94,11 +94,7 @@ vi.mock("@/hooks/queries/plugin-settings-queries", () => ({
   usePluginList: () => ({ data: { plugins: [] } }),
 }));
 vi.mock("@/lib/sdk", () => ({
-  sdk: {
-    system: {
-      experimental_recordTelemetryEvent: vi.fn().mockResolvedValue(undefined),
-    },
-  },
+  sdk: {},
 }));
 vi.mock("@/hooks/queries/sidebar-navigation-query", () => ({
   useSidebarNavigation: () => ({

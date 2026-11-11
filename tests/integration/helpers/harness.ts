@@ -55,7 +55,6 @@ import { createProviderNativeRootsCache } from "../../../apps/server/src/service
 import { createProviderLiveCommandsCache } from "../../../apps/server/src/services/providers/provider-live-commands.js";
 import { createBbAppManagedConfigReloader } from "../../../apps/server/src/services/system/bb-app-managed-config.js";
 import { createSetupGuideExperiment } from "../../../apps/server/src/services/system/setup-guide-experiment.js";
-import { createNoopTelemetryService } from "../../../apps/server/src/services/system/telemetry.js";
 import { TerminalSessionLifecycle } from "../../../apps/server/src/services/terminals/terminal-session-lifecycle.js";
 import type {
   ServerLogger,
@@ -245,7 +244,6 @@ async function startIntegrationServer(
     hub,
     logger: testLogger,
   });
-  const telemetry = createNoopTelemetryService();
   const skillTreeRegistry = new SkillTreeRegistry();
   const providerRegistry = createProviderRegistryService({});
   await registerFirstPartyProviders(providerRegistry);
@@ -264,7 +262,6 @@ async function startIntegrationServer(
     pluginHostArtifacts,
     aiServices,
     skillTreeRegistry,
-    telemetry,
     terminalSessions,
   });
   pendingInteractions.start();
@@ -304,7 +301,6 @@ async function startIntegrationServer(
         pluginHostArtifacts,
         providerRegistry,
         skillTreeRegistry,
-        telemetry,
         terminalSessions,
       }),
     }),
@@ -349,15 +345,7 @@ async function startIntegrationServer(
     pendingInteractions,
     sharedPorts,
     skillTreeRegistry,
-    setupGuideExperiment: await createSetupGuideExperiment({
-      dataDir: serverDataDir,
-      fetch: () => Promise.reject(new Error("no PostHog in tests")),
-      flagTimeoutMs: 1_000,
-      logger: testLogger,
-      override: null,
-      telemetry,
-    }),
-    telemetry,
+    setupGuideExperiment: await createSetupGuideExperiment({ override: null }),
     terminalSessions,
     walCheckpointer,
     watchInterests,

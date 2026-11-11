@@ -13,13 +13,7 @@ import {
   experimentVariant,
   type ExperimentBootstrap,
 } from "../experiments/flags";
-import {
-  useExperiment,
-  useExperimentExposer,
-  useExperimentExposure,
-} from "../experiments/use-experiment";
-import { useInitAnalytics } from "../landing/analytics";
-import { useSectionViews } from "../landing/section-views";
+import { useExperiment } from "../experiments/use-experiment";
 import adobeLogo from "../assets/company-logos/adobe.svg";
 import atlassianLogo from "../assets/company-logos/atlassian.svg";
 import blackstoneLogo from "../assets/company-logos/blackstone.png";
@@ -286,13 +280,8 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  component: LandingRoute,
+  component: LandingPage,
 });
-
-function LandingRoute() {
-  useInitAnalytics();
-  return <LandingPage />;
-}
 
 function useConstructMock() {
   useEffect(() => {
@@ -1065,17 +1054,6 @@ function AgentChat() {
   );
 }
 
-const BELOW_FOLD_SECTIONS: Record<"control" | "test", readonly string[]> = {
-  control: ["customizable", "kick-off", "gang", "fork-it", "closer"],
-  test: [
-    "make-it-yours",
-    "hand-off",
-    "start-anywhere",
-    "testimonials",
-    "closer",
-  ],
-};
-
 function Closer({
   title,
   lede,
@@ -1164,9 +1142,7 @@ function TodayBelowFold() {
           provider subscriptions you already pay for.
         </p>
         <div className="cta-row">
-          <GitHubLink placement="local" className="btn btn-ghost">
-            View the source →
-          </GitHubLink>
+          <GitHubLink className="btn btn-ghost">View the source →</GitHubLink>
         </div>
       </section>
 
@@ -1175,9 +1151,7 @@ function TodayBelowFold() {
         lede="Free, open source, and local-first. Install in under a minute."
       >
         <div className="cta-row cta-row-secondary">
-          <GitHubLink placement="closer" className="btn btn-ghost">
-            View on GitHub
-          </GitHubLink>
+          <GitHubLink className="btn btn-ghost">View on GitHub</GitHubLink>
         </div>
       </Closer>
     </>
@@ -1198,7 +1172,7 @@ function RefreshedBelowFold() {
           to change almost anything in bb, or choose from 500+ plugins built by
           the community.
         </p>
-        <MarketplaceLink placement="customize" className="band-link">
+        <MarketplaceLink className="band-link">
           Browse plugins &rarr;
         </MarketplaceLink>
       </Band>
@@ -1250,18 +1224,9 @@ function LandingPage() {
   const [companyProofInView, setCompanyProofInView] = useState(false);
   const companyProofRef = useRef<HTMLElement>(null);
   const qaCheck = useExperiment("homepage-qa-check");
-  useExperimentExposure("homepage-qa-check", "all");
   const subhead = useExperiment("homepage-hero");
-  useExperimentExposure("homepage-hero", "desktop");
   const belowFold = useExperiment("homepage-below-fold");
-  const exposeBelowFold = useExperimentExposer(
-    "homepage-below-fold",
-    "desktop",
-  );
   useScrollReveal();
-  useSectionViews((section) => {
-    if (BELOW_FOLD_SECTIONS[belowFold].includes(section)) exposeBelowFold();
-  });
   useConstructMock();
 
   useEffect(() => {

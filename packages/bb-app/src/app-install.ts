@@ -1,13 +1,6 @@
 import type { AppInstall } from "@bb/config/app-install";
 import type { RunCommand } from "./app-update/run-command.js";
 
-const OFFICIAL_SOURCE_REMOTE_PATTERN =
-  /^(?:(?:https?|ssh|git):\/\/)?(?:[^@/]+@)?github\.com[:/](?:get-bb|ymichael)\/bb(?:\.git)?\/?$/iu;
-
-export function isOfficialSourceRemote(url: string): boolean {
-  return OFFICIAL_SOURCE_REMOTE_PATTERN.test(url.trim());
-}
-
 async function tryGit(args: {
   gitArgs: string[];
   repoRoot: string;
@@ -29,16 +22,10 @@ export async function resolveAppInstall(args: {
 }): Promise<AppInstall> {
   if (args.desktop) return { kind: "desktop" };
   if (args.sourceRoot === null) return { kind: "npm" };
-  const git = { repoRoot: args.sourceRoot, runner: args.runner };
-  const commit = await tryGit({ ...git, gitArgs: ["rev-parse", "HEAD"] });
-  const remote =
-    commit === null
-      ? null
-      : await tryGit({ ...git, gitArgs: ["remote", "get-url", "origin"] });
-  if (commit === null || remote === null) {
-    return { kind: "source", origin: "none" };
-  }
-  return isOfficialSourceRemote(remote)
-    ? { commit, kind: "source", origin: "official" }
-    : { kind: "source", origin: "fork" };
+  const commit = await tryGit({
+    gitArgs: ["rev-parse", "HEAD"],
+    repoRoot: args.sourceRoot,
+    runner: args.runner,
+  });
+  return { commit: commit === "" ? null : commit, kind: "source" };
 }

@@ -1,5 +1,5 @@
 import type { FeatureFlags } from "@bb/domain";
-import type { AppInstallKind, AppSourceOrigin } from "./app-install.js";
+import type { AppInstallKind } from "./app-install.js";
 import type { AppSurface } from "./app-surface.js";
 import type { AppUpdateMode } from "./app-update.js";
 import {
@@ -17,7 +17,6 @@ import {
 import {
   BB_APP_INSTALL_KIND_ENV,
   BB_APP_SOURCE_COMMIT_ENV,
-  BB_APP_SOURCE_ORIGIN_ENV,
   BB_APP_URL_ENV,
   BB_APP_SURFACE_ENV,
   BB_APP_VERSION_ENV,
@@ -25,12 +24,10 @@ import {
   BB_EXTERNAL_URL_ENV,
   BB_INHERITED_SKILLS_ROOTS_ENV,
   BB_MARKETPLACE_URL_ENV,
-  BB_POSTHOG_API_KEY_ENV,
   BB_SERVER_BIND_HOST_ENV,
   BB_SERVER_LAUNCH_ID_ENV,
   BB_APP_UPDATE_MODE_ENV,
   BB_CLI_LAUNCHER_ENV,
-  BB_TELEMETRY_ENV,
   BB_PERF_DIAGNOSTICS_ENV,
   BB_SKIP_ONBOARDING_ENV,
   BB_SETUP_GUIDE_VARIANT_ENV,
@@ -40,9 +37,7 @@ import {
   DEFAULT_BB_CONNECT_GATE_KEYS_URL,
   DEFAULT_BB_EXTERNAL_URL,
   DEFAULT_BB_MARKETPLACE_URL,
-  DEFAULT_BB_POSTHOG_API_KEY,
   DEFAULT_BB_SERVER_BIND_HOST,
-  DEFAULT_BB_TELEMETRY,
   parseServerBindHost,
   type ServerBindHost,
   type SetupGuideVariant,
@@ -56,7 +51,6 @@ export interface ServerConfig
   extends CommonConfig, DatabaseConfig, ServerPortConfig {
   BB_APP_INSTALL_KIND?: AppInstallKind;
   BB_APP_SOURCE_COMMIT?: string;
-  BB_APP_SOURCE_ORIGIN?: AppSourceOrigin;
   BB_APP_URL: string;
   BB_APP_SURFACE: AppSurface;
   BB_APP_VERSION: string;
@@ -65,13 +59,11 @@ export interface ServerConfig
   BB_EXTERNAL_URL: string;
   BB_HOST_DAEMON_PORT: number;
   BB_INHERITED_SKILLS_ROOTS: string[];
-  BB_POSTHOG_API_KEY: string;
   BB_MARKETPLACE_URL: string;
   BB_SERVER_BIND_HOST: ServerBindHost;
   BB_SERVER_LAUNCH_ID?: string;
   BB_APP_UPDATE_MODE?: AppUpdateMode;
   BB_CLI_LAUNCHER?: string;
-  BB_TELEMETRY: boolean;
   BB_PERF_DIAGNOSTICS: boolean;
   BB_SKIP_ONBOARDING: boolean;
   BB_SETUP_GUIDE_VARIANT?: SetupGuideVariant;
@@ -163,12 +155,6 @@ export function loadServerConfig(
       definition: BB_MARKETPLACE_URL_ENV,
       env: loader.env,
     }),
-    BB_POSTHOG_API_KEY: readEnvVarWithDefault({
-      context: loader.context,
-      defaultValue: DEFAULT_BB_POSTHOG_API_KEY,
-      definition: BB_POSTHOG_API_KEY_ENV,
-      env: loader.env,
-    }),
     BB_SERVER_BIND_HOST: readEnvVarWithDefault({
       context: loader.context,
       defaultValue: DEFAULT_BB_SERVER_BIND_HOST,
@@ -186,12 +172,6 @@ export function loadServerConfig(
       definition: BB_SKIP_ONBOARDING_ENV,
       env: loader.env,
       defaultValue: false,
-    }),
-    BB_TELEMETRY: readEnvVarWithDefault({
-      context: loader.context,
-      defaultValue: DEFAULT_BB_TELEMETRY,
-      definition: BB_TELEMETRY_ENV,
-      env: loader.env,
     }),
     featureFlags: loadFeatureFlags({
       env: loader.env,
@@ -229,15 +209,6 @@ export function loadServerConfig(
     value: readOptionalEnvVar({
       context: loader.context,
       definition: BB_APP_INSTALL_KIND_ENV,
-      env: loader.env,
-    }),
-  });
-  assignIfDefined({
-    key: "BB_APP_SOURCE_ORIGIN",
-    target: config,
-    value: readOptionalEnvVar({
-      context: loader.context,
-      definition: BB_APP_SOURCE_ORIGIN_ENV,
       env: loader.env,
     }),
   });

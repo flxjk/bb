@@ -16,7 +16,6 @@ import type {
 } from "../app-contract.js";
 
 type ExpectedBbPluginApiKey =
-  | "internal_DO_NOT_USE_recordPluginUse"
   | "agents"
   | "background"
   | "cli"

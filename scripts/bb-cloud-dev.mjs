@@ -98,8 +98,7 @@ function signalService(child, signal) {
     } else {
       process.kill(-child.pid, signal);
     }
-  } catch {
-  }
+  } catch {}
 }
 
 async function stopService(child) {
@@ -181,8 +180,7 @@ function routeRequest(request) {
         return { target: WORKER_URL, changeOrigin: true };
       }
     }
-  } catch {
-  }
+  } catch {}
   return null;
 }
 
@@ -348,7 +346,6 @@ const web = spawnService(
     CLOUDFLARE_INCLUDE_PROCESS_ENV: "true",
     GITHUB_CLIENT_ID: "local-cloud-dev-unused",
     GITHUB_CLIENT_SECRET: "local-cloud-dev-unused",
-    LANDING_POSTHOG_KEY: "local-cloud-dev-unused",
     RESEND_API_KEY: "local-cloud-dev-unused",
     ...DATABASE_ENV,
   },

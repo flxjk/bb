@@ -22,7 +22,7 @@ export function DesktopInstallChoice({
         platform={platform}
         className="btn btn-primary btn-install install-download"
       />
-      <SendToComputerButton placement={placement} />
+      <SendToComputerButton />
       <span className="install-note install-note-desktop">{note}</span>
       <span className="install-note install-note-touch">{touchNote}</span>
     </span>

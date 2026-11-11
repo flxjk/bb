@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+  <title>Local Stack</title>
+  <rect x="3" y="4" width="18" height="6.5" rx="2" />
+  <rect x="3" y="13.5" width="18" height="6.5" rx="2" />
+  <path d="M7 7.25h.01" />
+  <path d="M7 16.75h.01" />
+</svg>

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { InternalDoNotUseSetupGuideSectionProps } from "@get-bb/plugin-sdk";
@@ -19,57 +19,34 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function Section({
-  onPhone,
-  onSetupStarted,
-  onSetupFailed,
-}: InternalDoNotUseSetupGuideSectionProps) {
-  return (
-    <li>
-      <span>{onPhone ? "phone row" : "desktop row"}</span>
-      <button type="button" onClick={onSetupStarted}>
-        Set up
-      </button>
-      <button type="button" onClick={() => onSetupFailed("turn_on")}>
-        Fail
-      </button>
-    </li>
-  );
+function Section({ onPhone }: InternalDoNotUseSetupGuideSectionProps) {
+  return <li>{onPhone ? "phone row" : "desktop row"}</li>;
 }
 
-function renderSections() {
-  const onSetupStarted = vi.fn();
-  const onSetupFailed = vi.fn();
-  const view = render(
+function renderSections(onPhone: boolean) {
+  return render(
     <MemoryRouter>
       <ul>
-        <PluginSetupGuideSections
-          pluginId="connect"
-          onPhone
-          onSetupStarted={onSetupStarted}
-          onSetupFailed={onSetupFailed}
-        />
+        <PluginSetupGuideSections pluginId="connect" onPhone={onPhone} />
       </ul>
     </MemoryRouter>,
   );
-  return { ...view, onSetupStarted, onSetupFailed };
 }
 
 describe("PluginSetupGuideSections", () => {
-  it("renders the plugin's section with the guide's props", () => {
+  it("renders the plugin's section with the guide's phone flag", () => {
     setPluginSlotRegistrations(
       "connect",
       registrationSet({
         setupGuideSections: [{ id: "remote-access", component: Section }],
       }),
     );
-    const { onSetupStarted, onSetupFailed } = renderSections();
-
+    const { unmount } = renderSections(true);
     expect(screen.getByText("phone row")).toBeDefined();
-    fireEvent.click(screen.getByRole("button", { name: "Set up" }));
-    expect(onSetupStarted).toHaveBeenCalledOnce();
-    fireEvent.click(screen.getByRole("button", { name: "Fail" }));
-    expect(onSetupFailed).toHaveBeenCalledExactlyOnceWith("turn_on");
+    unmount();
+
+    renderSections(false);
+    expect(screen.getByText("desktop row")).toBeDefined();
   });
 
   it("renders nothing when the plugin registers no section", () => {
@@ -79,7 +56,7 @@ describe("PluginSetupGuideSections", () => {
         setupGuideSections: [{ id: "remote-access", component: Section }],
       }),
     );
-    const { container } = renderSections();
+    const { container } = renderSections(true);
 
     expect(container.querySelector("ul")?.childElementCount).toBe(0);
   });
@@ -96,7 +73,7 @@ describe("PluginSetupGuideSections", () => {
         setupGuideSections: [{ id: "remote-access", component: Crashes }],
       }),
     );
-    renderSections();
+    renderSections(true);
 
     expect(screen.getByText("plugin connect crashed")).toBeDefined();
   });

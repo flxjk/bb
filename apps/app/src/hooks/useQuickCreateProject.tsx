@@ -31,18 +31,10 @@ interface QuickCreateProjectDialogState {
   target: ProjectPathDialogTarget | null;
 }
 
-interface ProjectCreateObserver {
-  onStarted: () => void;
-  onSettled: (
-    result: { outcome: "succeeded" } | { outcome: "failed"; error: unknown },
-  ) => void;
-}
-
 interface QuickCreateProjectController {
   isAvailable: boolean;
   isCreating: boolean;
   openCreateDialog: () => void;
-  openObservedCreateDialog: (observer: ProjectCreateObserver) => void;
   openCreateDialogThen: (onCreated: (projectId: string) => void) => void;
   platform: HostPlatform | null;
   hostId: string | null;
@@ -66,7 +58,6 @@ export function useQuickCreateProject(): QuickCreateProjectController {
   const location = useLocation();
   const setRootComposeProjectId = useSetRootComposeProjectId();
   const shouldReplaceRoute = location.pathname === APP_ROOT_ROUTE_PATH;
-  const observerRef = useRef<ProjectCreateObserver | null>(null);
   const onCreatedRef = useRef<((projectId: string) => void) | null>(null);
 
   const submit = useCallback(
@@ -75,8 +66,6 @@ export function useQuickCreateProject(): QuickCreateProjectController {
       const name = deriveProjectNameFromPath(path).trim();
       if (!name) return;
 
-      const observer = observerRef.current;
-      observer?.onStarted();
       mutate(
         {
           name,
@@ -84,7 +73,6 @@ export function useQuickCreateProject(): QuickCreateProjectController {
         },
         {
           onSuccess: (project) => {
-            observer?.onSettled({ outcome: "succeeded" });
             closeDialog();
             const onCreated = onCreatedRef.current;
             onCreatedRef.current = null;
@@ -97,7 +85,6 @@ export function useQuickCreateProject(): QuickCreateProjectController {
               replace: shouldReplaceRoute,
             });
           },
-          onError: (error) => observer?.onSettled({ outcome: "failed", error }),
         },
       );
     },
@@ -110,22 +97,12 @@ export function useQuickCreateProject(): QuickCreateProjectController {
   });
 
   const openCreateDialog = useCallback(() => {
-    observerRef.current = null;
     onCreatedRef.current = null;
     controller.openPathEntry({ kind: "create" });
   }, [controller]);
 
-  const openObservedCreateDialog = useCallback(
-    (observer: ProjectCreateObserver) => {
-      observerRef.current = observer;
-      onCreatedRef.current = null;
-      controller.openPathEntry({ kind: "create" });
-    },
-    [controller],
-  );
   const openCreateDialogThen = useCallback(
     (onCreated: (projectId: string) => void) => {
-      observerRef.current = null;
       onCreatedRef.current = onCreated;
       controller.openPathEntry({ kind: "create" });
     },
@@ -137,7 +114,6 @@ export function useQuickCreateProject(): QuickCreateProjectController {
       isAvailable: controller.isAvailable,
       isCreating: isPending,
       openCreateDialog,
-      openObservedCreateDialog,
       openCreateDialogThen,
       platform: controller.platform,
       hostId: controller.hostId,
@@ -146,14 +122,7 @@ export function useQuickCreateProject(): QuickCreateProjectController {
       projectPathDialog: controller.projectPathDialog,
       submitProjectPath: controller.submitProjectPath,
     }),
-    [
-      controller,
-      hosts,
-      isPending,
-      openCreateDialog,
-      openCreateDialogThen,
-      openObservedCreateDialog,
-    ],
+    [controller, hosts, isPending, openCreateDialog, openCreateDialogThen],
   );
 }
 

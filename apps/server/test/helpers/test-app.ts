@@ -22,6 +22,7 @@ import {
   type DbConnection,
 } from "@bb/db";
 import { defaultFeatureFlags } from "@bb/domain";
+import type { SetupGuideVariant } from "@bb/server-contract";
 import { createMigratedConnection } from "@bb/db/testing";
 import { createApp } from "../../src/server.js";
 import { PendingInteractionLifecycle } from "../../src/services/interactions/pending-interactions.js";
@@ -48,7 +49,6 @@ import {
 } from "../../src/services/system/cli-command.js";
 import { createAppVersionService } from "../../src/services/system/app-version.js";
 import { createBbAppManagedConfigReloader } from "../../src/services/system/bb-app-managed-config.js";
-import { createNoopTelemetryService } from "../../src/services/system/telemetry.js";
 import { createSetupGuideExperiment } from "../../src/services/system/setup-guide-experiment.js";
 import { TerminalSessionLifecycle } from "../../src/services/terminals/terminal-session-lifecycle.js";
 import { createLifecycleDedupers } from "../../src/lifecycle-dedupers.js";
@@ -109,6 +109,7 @@ export type TestAppHarnessConfigOverrides = Partial<ServerRuntimeConfig> & {
   liveCommandsClock?: () => number;
   seedFirstPartyProviders?: boolean;
   tunnelIngressNow?: () => number;
+  setupGuideVariant?: SetupGuideVariant | null;
   extraProviders?: readonly {
     declaration: PluginProviderDeclaration;
     pluginId: string;
@@ -175,6 +176,7 @@ export async function createTestAppHarness(
     liveCommandsClock,
     seedFirstPartyProviders = true,
     tunnelIngressNow: _tunnelIngressNow,
+    setupGuideVariant = null,
     ...configOverrides
   } = overrides;
   const logger = createTestLogger();
@@ -272,7 +274,6 @@ export async function createTestAppHarness(
     hub,
     logger,
   });
-  const telemetry = createNoopTelemetryService();
   const skillTreeRegistry = new SkillTreeRegistry();
   const aiServices = createAiServiceRegistry();
   const pendingInteractions = new PendingInteractionLifecycle({
@@ -286,7 +287,6 @@ export async function createTestAppHarness(
     pluginHostArtifacts,
     aiServices,
     skillTreeRegistry,
-    telemetry,
     terminalSessions,
   });
   pendingInteractions.start();
@@ -329,7 +329,6 @@ export async function createTestAppHarness(
           pluginHostArtifacts,
           providerRegistry,
           skillTreeRegistry,
-          telemetry,
           terminalSessions,
         }),
       }),
@@ -364,12 +363,7 @@ export async function createTestAppHarness(
         },
       }),
     setupGuideExperiment: await createSetupGuideExperiment({
-      dataDir,
-      fetch: () => Promise.reject(new Error("no PostHog in tests")),
-      flagTimeoutMs: 1_000,
-      logger,
-      override: null,
-      telemetry,
+      override: setupGuideVariant,
     }),
     config,
     db,
@@ -386,7 +380,6 @@ export async function createTestAppHarness(
     ),
     aiServices,
     skillTreeRegistry,
-    telemetry,
     terminalSessions,
     watchInterests,
     sharedPorts,

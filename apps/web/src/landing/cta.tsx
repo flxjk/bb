@@ -3,7 +3,6 @@ import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
-import { trackLandingEvent } from "./analytics";
 import { LinuxIcon } from "./icons";
 import type { CtaPlacement, DesktopPlatform } from "./site";
 import {
@@ -17,6 +16,11 @@ import {
 
 type CtaLinkProps = {
   placement: CtaPlacement;
+  className?: string;
+  children: ReactNode;
+};
+
+type LinkProps = {
   className?: string;
   children: ReactNode;
 };
@@ -77,9 +81,7 @@ export function DesktopDownloadIcon({
       <HugeiconsIcon icon={WindowsSolidIcon} className="btn-ic" aria-hidden />
     );
   }
-  return (
-    <HugeiconsIcon icon={AppleSolidIcon} className="btn-ic" aria-hidden />
-  );
+  return <HugeiconsIcon icon={AppleSolidIcon} className="btn-ic" aria-hidden />;
 }
 
 export function DesktopDownloadButton({
@@ -103,19 +105,13 @@ export function DesktopDownloadButton({
   );
 }
 
-function TrackedExternalLink({
+function ExternalLink({
   href,
-  event,
-  placement,
   className,
   children,
   "aria-label": ariaLabel,
-}: CtaLinkProps & {
+}: LinkProps & {
   href: string;
-  event:
-    | "landing_github_clicked"
-    | "landing_discord_clicked"
-    | "landing_x_clicked";
   "aria-label"?: string;
 }) {
   return (
@@ -125,60 +121,30 @@ function TrackedExternalLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      onClick={() =>
-        trackLandingEvent({ name: event, properties: { placement } })
-      }
     >
       {children}
     </a>
   );
 }
 
-export function GitHubLink(props: CtaLinkProps & { "aria-label"?: string }) {
-  return (
-    <TrackedExternalLink
-      {...props}
-      href={GITHUB_URL}
-      event="landing_github_clicked"
-    />
-  );
+export function GitHubLink(props: LinkProps & { "aria-label"?: string }) {
+  return <ExternalLink {...props} href={GITHUB_URL} />;
 }
 
-export function MarketplaceLink({
-  placement,
-  className,
-  children,
-}: CtaLinkProps) {
+export function MarketplaceLink({ className, children }: LinkProps) {
   return (
-    <a
-      className={className}
-      href="/marketplace"
-      onClick={() =>
-        trackLandingEvent({
-          name: "landing_marketplace_clicked",
-          properties: { placement },
-        })
-      }
-    >
+    <a className={className} href="/marketplace">
       {children}
     </a>
   );
 }
 
-export function DiscordLink(props: CtaLinkProps) {
-  return (
-    <TrackedExternalLink
-      {...props}
-      href={DISCORD_URL}
-      event="landing_discord_clicked"
-    />
-  );
+export function DiscordLink(props: LinkProps) {
+  return <ExternalLink {...props} href={DISCORD_URL} />;
 }
 
-export function XLink(props: CtaLinkProps & { "aria-label"?: string }) {
-  return (
-    <TrackedExternalLink {...props} href={X_URL} event="landing_x_clicked" />
-  );
+export function XLink(props: LinkProps & { "aria-label"?: string }) {
+  return <ExternalLink {...props} href={X_URL} />;
 }
 
 type SubscribeStatus = "idle" | "submitting" | "success" | "error";
@@ -189,7 +155,7 @@ export function focusSubscribeEmail() {
   document.getElementById(SUBSCRIBE_EMAIL_ID)?.focus();
 }
 
-export function EmailSignup({ placement }: { placement: CtaPlacement }) {
+export function EmailSignup() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<SubscribeStatus>("idle");
   const [error, setError] = useState("");
@@ -222,10 +188,6 @@ export function EmailSignup({ placement }: { placement: CtaPlacement }) {
         setStatus("error");
         return;
       }
-      trackLandingEvent({
-        name: "landing_email_subscribed",
-        properties: { placement },
-      });
       setStatus("success");
     } catch {
       setError("Could not reach the server. Try again.");
@@ -295,7 +257,7 @@ export function SubscribeSection({
     <section className="subscribe" id={id} data-reveal={reveal || undefined}>
       <h2 className="subscribe-title">Stay in the loop.</h2>
       <p>{blurb}</p>
-      <EmailSignup placement="footer" />
+      <EmailSignup />
     </section>
   );
 }

@@ -6,8 +6,6 @@ import {
 import { useInitialPromptDraft } from "./mentions/initial-prompt-draft";
 import { ProviderRequirementBanner } from "./banner/ProviderRequirementBanner";
 import { Button } from "@bb/shared-ui/button";
-import { recordTelemetryEvent } from "@/components/onboarding/onboarding-telemetry";
-import { operationFailureReason } from "@/components/onboarding/onboarding-model";
 import {
   getPluginConfigurationRoutePath,
   getSettingsRoutePath,
@@ -43,7 +41,6 @@ import type {
   SidebarBootstrapResponse,
   SystemEnvironmentProvider,
   SystemExecutionOptionsModelLoadError,
-  RecordTelemetryEventRequest,
 } from "@bb/server-contract";
 import type { ProjectSelectorCreateProjectConfig } from "@/components/pickers/ProjectSelector";
 import {
@@ -303,28 +300,15 @@ type LiveDraftNewThreadPromptBoxProps = Omit<
   attachments: Omit<NewThreadPromptBoxProps["attachments"], "items">;
   history: Omit<NewThreadPromptBoxProps["history"], "currentDraft">;
   promptDraft: PromptDraftController;
-  blockerReason: NewThreadBlockerReason | null;
 };
 
 function LiveDraftNewThreadPromptBox({
   attachments,
   history,
   promptDraft,
-  blockerReason,
   ...promptBoxProps
 }: LiveDraftNewThreadPromptBoxProps) {
   const draft = usePromptDraftSnapshot(promptDraft);
-  const hasDraft = !isPromptDraftEmpty(draft);
-  const reportedBlockers = useRef(new Set<NewThreadBlockerReason>());
-  useEffect(() => {
-    if (!hasDraft || blockerReason === null) return;
-    if (reportedBlockers.current.has(blockerReason)) return;
-    reportedBlockers.current.add(blockerReason);
-    recordTelemetryEvent({
-      name: "new_thread_blocker",
-      properties: { reason: blockerReason },
-    });
-  }, [blockerReason, hasDraft]);
   return (
     <NewThreadPromptBox
       {...promptBoxProps}
@@ -358,10 +342,14 @@ export interface ResolveNewThreadSubmitDisabledReasonArgs {
   submissionEnvironmentUnavailable: boolean;
 }
 
-export type NewThreadBlockerReason = Extract<
-  RecordTelemetryEventRequest,
-  { name: "new_thread_blocker" }
->["properties"]["reason"];
+export type NewThreadBlockerReason =
+  | "agent_missing"
+  | "agent_update"
+  | "model_selection"
+  | "model_unavailable"
+  | "project_setup"
+  | "provider_selection"
+  | "sign_in";
 
 export interface NewThreadBlocker {
   message: string;
@@ -1683,7 +1671,6 @@ export function NewThreadComposer({
     submissionEnvironmentUnavailable: submissionEnvironment === null,
   });
   const submissionReadinessReason = submissionBlocker?.message ?? null;
-  const submissionBlockerReason = submissionBlocker?.reason ?? null;
   const submitDisabledReason =
     submissionReadinessReason ??
     (promptInputEmpty ? "Enter a prompt or attach a file." : null);
@@ -1740,25 +1727,10 @@ export function NewThreadComposer({
       setAttachmentError(null);
       const clearedSubmittedDraft =
         promptDraft.clearIfCurrentMatches(submittedDraft);
-      recordTelemetryEvent({
-        name: "new_thread_submit",
-        properties: { outcome: "started" },
-      });
       try {
         await onSubmit(request);
-        recordTelemetryEvent({
-          name: "new_thread_submit",
-          properties: { outcome: "accepted" },
-        });
         clearReuseEnvironment();
       } catch (submitError) {
-        recordTelemetryEvent({
-          name: "new_thread_submit",
-          properties: {
-            outcome: "failed",
-            failure_reason: operationFailureReason(submitError),
-          },
-        });
         if (clearedSubmittedDraft) {
           promptDraft.restoreIfEmpty(submittedDraft);
         }
@@ -2006,9 +1978,6 @@ export function NewThreadComposer({
       const disabledReason = options.blocker?.message ?? submitDisabledReason;
       return (
         <LiveDraftNewThreadPromptBox
-          blockerReason={
-            options.blocker ? options.blocker.reason : submissionBlockerReason
-          }
           promptDraft={promptDraft}
           id={options.id}
           focusRequest={promptBoxFocusRequest}
@@ -2240,7 +2209,6 @@ export function NewThreadComposer({
       supportsPermissionModeSelection,
       supportsServiceTier,
       submitDisabledReason,
-      submissionBlockerReason,
       machineServerAccessReason,
       setupRequiredProvider,
       environmentSetupRequiredReason,

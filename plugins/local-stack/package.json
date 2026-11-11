@@ -1,0 +1,67 @@
+{
+  "name": "bb-plugin-bb--local-stack",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OpenViking memory, bb threads on local ACP agents (Reasonix, Gemini, Antigravity, DeepSeek Harness), and separate AI services for thread titles and commit messages on Ollama, OpenRouter, Gemini and DeepSeek.",
+  "engines": {
+    "bb": ">=0.0",
+    "bbPluginSdk": ">=0.4.102"
+  },
+  "bb": {
+    "name": "Local Stack",
+    "description": "OpenViking memory, bb threads on local ACP agents (Reasonix, Gemini, Antigravity, DeepSeek Harness), and separate AI services for thread titles and commit messages on Ollama, OpenRouter, Gemini and DeepSeek.",
+    "branding": {
+      "icon": "./icons/local-stack.svg",
+      "experimental_icons": {
+        "antigravity": "./icons/antigravity.svg"
+      }
+    },
+    "server": "./server.ts",
+    "host": "./host.ts",
+    "skills": [
+      "skills"
+    ],
+    "experimental_providers": [
+      {
+        "kind": "agent",
+        "id": "reasonix",
+        "displayName": "Reasonix"
+      },
+      {
+        "kind": "agent",
+        "id": "gemini",
+        "displayName": "Gemini"
+      },
+      {
+        "kind": "agent",
+        "id": "antigravity",
+        "displayName": "Antigravity"
+      },
+      {
+        "kind": "agent",
+        "id": "deepseek-harness",
+        "displayName": "DeepSeek Harness"
+      }
+    ]
+  },
+  "keywords": [
+    "bb-plugin"
+  ],
+  "scripts": {
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsrs --noEmit",
+    "lint": "oxlint --ignore-pattern node_modules --ignore-pattern dist .",
+    "prepare:bundled": "bb-plugin-build prepare-bundled"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@bb/plugin-build": "workspace:*",
+    "@get-bb/plugin-sdk": "workspace:*",
+    "@types/node": "^22.20.5",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
+    "vitest": "^4.1.12"
+  }
+}

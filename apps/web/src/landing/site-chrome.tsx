@@ -11,10 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
-import {
-  useExperiment,
-  useExperimentExposure,
-} from "../experiments/use-experiment";
+import { useExperiment } from "../experiments/use-experiment";
 import { DASHBOARD_PATH } from "../lib/connect-return-to";
 import {
   compareLinks,
@@ -199,7 +196,6 @@ function GuidesMenu({
 export function GitHubStarsLink({ stars }: { stars: number | null }) {
   return (
     <GitHubLink
-      placement="nav"
       className={
         stars === null ? "nav-icon-button" : "nav-icon-button nav-github-stars"
       }
@@ -228,7 +224,6 @@ export function SiteNav({
 }) {
   const platform = useDesktopPlatform();
   const newHeader = useExperiment("homepage-download-path") === "test";
-  useExperimentExposure("homepage-download-path", "desktop");
   return (
     <nav className={newHeader ? "nav nav-sticky nav-centered" : "nav"}>
       <a className="logo" href="/" aria-label="bb">
@@ -350,13 +345,13 @@ export function SiteFooter({ current }: { current?: string }) {
           <a href="/blog">Blog</a>
         </li>
         <li>
-          <GitHubLink placement="footer">GitHub</GitHubLink>
+          <GitHubLink>GitHub</GitHubLink>
         </li>
         <li>
-          <DiscordLink placement="footer">Discord</DiscordLink>
+          <DiscordLink>Discord</DiscordLink>
         </li>
         <li>
-          <XLink placement="footer" aria-label="X">
+          <XLink aria-label="X">
             <HugeiconsIcon
               icon={NewTwitterIcon}
               className="footer-x"

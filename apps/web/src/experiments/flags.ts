@@ -21,10 +21,6 @@ export const SITE_WIDE_EXPERIMENTS: readonly ExperimentKey[] = [
   "homepage-download-path",
 ];
 
-export const TOUCH_QUERY = "(hover: none) and (pointer: coarse)";
-
-export type ExperimentDevices = "all" | "desktop" | "touch";
-
 export type ExperimentBootstrap = {
   distinctID: string | null;
   featureFlags: Readonly<Record<string, string>>;

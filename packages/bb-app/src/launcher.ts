@@ -101,7 +101,6 @@ import {
 import {
   APP_INSTALL_KIND_ENV_NAME,
   APP_SOURCE_COMMIT_ENV_NAME,
-  APP_SOURCE_ORIGIN_ENV_NAME,
   appInstallEnv,
   type AppInstall,
 } from "@bb/config/app-install";
@@ -200,10 +199,8 @@ const STARTUP_ONLY_MANAGED_ENV_KEYS = new Set<string>([
   "BB_LOG_LEVEL",
   "BB_PERF_DIAGNOSTICS",
   "BB_MANAGED_DEV_BUILTIN_PLUGIN_HOT_RELOAD",
-  "BB_POSTHOG_API_KEY",
   "BB_SERVER_BIND_HOST",
   "BB_SERVER_PORT",
-  "BB_TELEMETRY",
 ]);
 const PORTABLE_ENV_NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/u;
 const SECRET_SHAPED_ENV_NAME_PATTERN =
@@ -1001,7 +998,6 @@ function applyWorktreeRuntimePolicy(
     BB_INHERITED_SKILLS_ROOTS: policy.inheritedSkillsRoots,
     BB_SERVER_BIND_HOST: policy.serverBindHost,
     BB_SERVER_PORT: String(policy.serverPort),
-    BB_TELEMETRY: "false",
   };
   delete nextEnv.BB_DEV_APP_PORT;
   return nextEnv;
@@ -1586,9 +1582,7 @@ Startup-only server and launcher keys:
   BB_APP_SURFACE, BB_APP_URL, BB_DATA_DIR, BB_DEV_APP_PORT,
   BB_EXTERNAL_URL, BB_HOST_DAEMON_PORT, BB_INHERITED_SKILLS_ROOTS,
   BB_LOG_LEVEL, BB_MANAGED_DEV_BUILTIN_PLUGIN_HOT_RELOAD, BB_PERF_DIAGNOSTICS,
-  BB_POSTHOG_API_KEY,
-  BB_SERVER_BIND_HOST, BB_SERVER_PORT, BB_TELEMETRY, and BB_FF_* feature
-  flags.
+  BB_SERVER_BIND_HOST, BB_SERVER_PORT, and BB_FF_* feature flags.
   Changes require a full bb-app restart with bb-app stop && bb-app start,
   or a desktop app restart. BB_APP_URL can instead be changed live with
   bb-app config.
@@ -2572,7 +2566,6 @@ export function createServerEnv(args: CreateServerEnvArgs): NodeJS.ProcessEnv {
   const inheritedEnv = hostToolchain.environment(args.env);
   delete inheritedEnv[APP_INSTALL_KIND_ENV_NAME];
   delete inheritedEnv[APP_SOURCE_COMMIT_ENV_NAME];
-  delete inheritedEnv[APP_SOURCE_ORIGIN_ENV_NAME];
   delete inheritedEnv[CLI_LAUNCHER_ENV_NAME];
   return {
     ...inheritedEnv,

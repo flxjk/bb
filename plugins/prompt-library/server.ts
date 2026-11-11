@@ -292,10 +292,6 @@ export default function promptLibraryPlugin(bb: BbPluginApi): void {
       store.markUsed(id, Date.now());
       return null;
     },
-    recordInsertion() {
-      bb.internal_DO_NOT_USE_recordPluginUse();
-      return null;
-    },
   });
 
   bb.cli.register(

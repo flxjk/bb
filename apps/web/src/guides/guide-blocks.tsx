@@ -20,7 +20,6 @@ import {
 
 import { LightboxImage } from "../blog/lightbox";
 import { brandProse } from "../compare/compare-page";
-import { trackLandingEvent } from "../landing/analytics";
 import type { GuideShot } from "./guide-types";
 import { copyPlainText } from "../lib/copy-plain-text";
 
@@ -127,30 +126,18 @@ export function Ui({
 }
 
 interface GuidePrompt {
-  guide: string;
   prompt: string;
 }
 
 export const GuidePromptContext = createContext<GuidePrompt>({
-  guide: "",
   prompt: "",
 });
 
 export function CopyPromptButton() {
-  const { guide, prompt } = useContext(GuidePromptContext);
+  const { prompt } = useContext(GuidePromptContext);
   const { copied, copy } = useCopy(prompt, PROMPT_COPIED);
   return (
-    <button
-      type="button"
-      className="gd-inline-copy"
-      onClick={() => {
-        copy();
-        trackLandingEvent({
-          name: "guide_prompt_copied",
-          properties: { guide, placement: "step" },
-        });
-      }}
-    >
+    <button type="button" className="gd-inline-copy" onClick={copy}>
       <HugeiconsIcon
         icon={copied ? Tick02Icon : Copy01Icon}
         className="gd-ic"

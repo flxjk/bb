@@ -81,28 +81,6 @@ export type CtaPlacement =
   | "footer"
   | "download_page";
 
-export const UTM_PARAM_NAMES = [
-  "utm_source",
-  "utm_medium",
-  "utm_campaign",
-  "utm_term",
-  "utm_content",
-] as const;
-
-export const CLICK_ID_PARAM_NAMES = ["gclid", "gbraid", "wbraid"] as const;
-
-export const CAMPAIGN_PARAM_NAMES = [
-  ...UTM_PARAM_NAMES,
-  ...CLICK_ID_PARAM_NAMES,
-] as const;
-
-export const VISIT_PARAM_NAMES = [
-  "visitor_id",
-  "session_id",
-  "first_page",
-  "first_referrer",
-] as const;
-
 export function downloadHref(
   platform: DesktopPlatform,
   placement: CtaPlacement,

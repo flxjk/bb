@@ -165,10 +165,8 @@ const startupOnlyManagedEnvCases: StartupOnlyManagedEnvCase[] = [
   { key: "BB_INHERITED_SKILLS_ROOTS", value: "/tmp/bb-skills" },
   { key: "BB_LOG_LEVEL", value: "debug" },
   { key: "BB_MANAGED_DEV_BUILTIN_PLUGIN_HOT_RELOAD", value: "1" },
-  { key: "BB_POSTHOG_API_KEY", value: "test-posthog-key" },
   { key: "BB_SERVER_BIND_HOST", value: "127.0.0.1" },
   { key: "BB_SERVER_PORT", value: "48886" },
-  { key: "BB_TELEMETRY", value: "false" },
 ];
 
 const packageMetadataSchema = z.object({
@@ -1083,7 +1081,6 @@ describe("bb-app launcher", () => {
           BB_INHERITED_SKILLS_ROOTS: "/stored/skills",
           BB_SERVER_BIND_HOST: "0.0.0.0",
           BB_SERVER_PORT: "48886",
-          BB_TELEMETRY: "true",
           OPENAI_API_KEY: "stored-openai-key",
         },
       }),
@@ -1121,7 +1118,6 @@ describe("bb-app launcher", () => {
         BB_INHERITED_SKILLS_ROOTS: "/worktree/skills",
         BB_SERVER_BIND_HOST: "127.0.0.1",
         BB_SERVER_PORT: "47886",
-        BB_TELEMETRY: "false",
         OPENAI_API_KEY: "stored-openai-key",
       });
       expect(env.BB_DEV_APP_PORT).toBeUndefined();
@@ -1658,7 +1654,6 @@ describe("bb-app launcher", () => {
           BB_FF_PLACEHOLDER: "true",
           BB_SERVER_BIND_HOST: "0.0.0.0",
           BB_SERVER_PORT: "48886",
-          BB_TELEMETRY: "false",
         },
       }),
       "utf8",
@@ -1679,7 +1674,7 @@ describe("bb-app launcher", () => {
 
       expect(output).toContain("Reloaded running bb server config.");
       expect(output).toContain(
-        "Startup-only settings currently configured (BB_FF_PLACEHOLDER, BB_LOG_LEVEL, BB_SERVER_BIND_HOST, BB_SERVER_PORT, BB_TELEMETRY) apply on the next full bb-app restart.",
+        "Startup-only settings currently configured (BB_FF_PLACEHOLDER, BB_LOG_LEVEL, BB_SERVER_BIND_HOST, BB_SERVER_PORT) apply on the next full bb-app restart.",
       );
     } finally {
       await server.close();
@@ -2167,20 +2162,18 @@ describe("bb-app launcher", () => {
     expect(invalidSurfaceServerEnv.BB_APP_SURFACE).toBe("web");
   });
 
-  it("replaces inherited install markers so a fork never reports a stale commit", () => {
+  it("replaces inherited install markers so a stale commit is never reported", () => {
     const serverEnv = createServerEnv({
       cliLauncherPath: null,
       context: createTestStartContext(),
       env: {
         BB_APP_INSTALL_KIND: "source",
         BB_APP_SOURCE_COMMIT: "a".repeat(40),
-        BB_APP_SOURCE_ORIGIN: "official",
       },
-      install: { kind: "source", origin: "fork" },
+      install: { kind: "npm" },
     });
 
-    expect(serverEnv.BB_APP_INSTALL_KIND).toBe("source");
-    expect(serverEnv.BB_APP_SOURCE_ORIGIN).toBe("fork");
+    expect(serverEnv.BB_APP_INSTALL_KIND).toBe("npm");
     expect(serverEnv).not.toHaveProperty("BB_APP_SOURCE_COMMIT");
   });
 
@@ -2200,7 +2193,7 @@ describe("bb-app launcher", () => {
         cliLauncherPath: null,
         context,
         env: { BB_CLI_LAUNCHER: "/stale/bin/bb" },
-        install: { kind: "source", origin: "none" },
+        install: { commit: "a".repeat(40), kind: "source" },
       }),
     ).not.toHaveProperty("BB_CLI_LAUNCHER");
   });

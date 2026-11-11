@@ -7,7 +7,6 @@ import { useState } from "react";
 
 import blogCss from "../blog/blog.css?url";
 import compareCss from "../compare/compare.css?url";
-import { trackLandingEvent, useInitAnalytics } from "../landing/analytics";
 import { DesktopDownloadButton } from "../landing/cta";
 import { useDesktopPlatform } from "../landing/desktop-platform";
 import { InstallOptions } from "../landing/landing-visuals";
@@ -63,28 +62,14 @@ function CopyForAgent({
   prompt,
   label,
   className,
-  guide,
-  placement,
 }: {
   prompt: string;
   label: string;
   className: string;
-  guide: string;
-  placement: "hero" | "handoff";
 }) {
   const { copied, copy } = useCopy(prompt, PROMPT_COPIED);
   return (
-    <button
-      type="button"
-      className={`btn gd-copy ${className}`}
-      onClick={() => {
-        copy();
-        trackLandingEvent({
-          name: "guide_prompt_copied",
-          properties: { guide, placement },
-        });
-      }}
-    >
+    <button type="button" className={`btn gd-copy ${className}`} onClick={copy}>
       <HugeiconsIcon
         icon={copied ? Tick02Icon : Copy01Icon}
         className="gd-ic"
@@ -106,8 +91,6 @@ function GuideHero({ guide }: { guide: Guide }) {
           prompt={guide.agentPrompt}
           label="Copy for agent"
           className="btn-primary"
-          guide={guide.slug}
-          placement="hero"
         />
         <DesktopDownloadButton
           placement="hero"
@@ -150,8 +133,6 @@ function AgentHandoff({ guide }: { guide: Guide }) {
           prompt={guide.agentPrompt}
           label="Copy"
           className="btn-primary btn-sm"
-          guide={guide.slug}
-          placement="handoff"
         />
       </div>
       <div className={open ? "gd-prompt open" : "gd-prompt"}>
@@ -213,12 +194,8 @@ function FaqList({ items }: { items: GuideFaq[] }) {
 }
 
 export function GuidePage({ guide }: { guide: Guide }) {
-  useInitAnalytics();
-
   return (
-    <GuidePromptContext.Provider
-      value={{ guide: guide.slug, prompt: guide.agentPrompt }}
-    >
+    <GuidePromptContext.Provider value={{ prompt: guide.agentPrompt }}>
       <CopyToast>
         <div className="wrap cmp-page gd-page">
           <SiteNav current="guides" path={`/guides/${guide.slug}`} />

@@ -69,9 +69,6 @@ const PORT_COLLISION_PATTERN =
 const scriptsDir = dirname(fileURLToPath(import.meta.url));
 const packageRoot = resolve(scriptsDir, "..");
 const tempRoot = await mkdtemp(join(tmpdir(), "bb-app-tarball-"));
-const smokeProcessEnv = {
-  BB_TELEMETRY: "false",
-};
 const stopManagedProcess = createManagedProcessStop(PROCESS_STOP_TIMEOUT_MS);
 
 function formatElapsed(startedAt) {
@@ -176,7 +173,6 @@ async function runCommand({ args, command, cwd = tempRoot, env = {}, label }) {
     env: {
       ...process.env,
       ...env,
-      ...smokeProcessEnv,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -200,7 +196,6 @@ function spawnManagedProcess({ args, command, env = {}, label }) {
     env: {
       ...process.env,
       ...env,
-      ...smokeProcessEnv,
     },
     stdio: ["ignore", "pipe", "pipe"],
   });

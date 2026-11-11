@@ -286,8 +286,6 @@ export default async function plugin(bb: BbPluginApi) {
         contentEncoding: "utf8",
         expectedSha256,
       });
-      if (result.outcome === "written")
-        bb.internal_DO_NOT_USE_recordPluginUse();
       return result.outcome === "written"
         ? { outcome: "written" as const, sha256: result.sha256 }
         : { outcome: "conflict" as const, currentSha256: result.currentSha256 };

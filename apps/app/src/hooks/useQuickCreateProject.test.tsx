@@ -56,24 +56,6 @@ vi.mock("@/hooks/useLocalPathPicker", () => ({
   },
 }));
 
-function submitArgs() {
-  return mocks.pickerOptions as {
-    submit: (params: {
-      path: string;
-      hostId: string;
-      target: { kind: "create" };
-      closeDialog: () => void;
-    }) => void;
-  };
-}
-
-function mutateCallbacks() {
-  return mocks.mutate.mock.lastCall?.[1] as {
-    onSuccess: (project: { id: string }) => void;
-    onError: (error: unknown) => void;
-  };
-}
-
 vi.mock("@/lib/root-compose-selection", () => ({
   useSetRootComposeProjectId: () => mocks.setRootComposeProjectId,
 }));
@@ -107,40 +89,6 @@ describe("useQuickCreateProject", () => {
     act(() => result.current.openCreateDialog());
 
     expect(mocks.openPathEntry).toHaveBeenCalledWith({ kind: "create" });
-  });
-
-  it("reports a create opened with an observer as started, then its outcome", () => {
-    const { result } = renderHook(() => useQuickCreateProject());
-    const submit = () =>
-      submitArgs().submit({
-        path: "/home/me/notes",
-        hostId: "host_atum",
-        target: { kind: "create" },
-        closeDialog: vi.fn(),
-      });
-    const observer = { onStarted: vi.fn(), onSettled: vi.fn() };
-
-    act(() => result.current.openObservedCreateDialog(observer));
-    expect(mocks.openPathEntry).toHaveBeenCalledWith({ kind: "create" });
-    act(() => submit());
-    expect(observer.onStarted).toHaveBeenCalledOnce();
-    const failure = new Error("exists");
-    act(() => mutateCallbacks().onError(failure));
-    expect(observer.onSettled).toHaveBeenLastCalledWith({
-      outcome: "failed",
-      error: failure,
-    });
-
-    act(() => submit());
-    act(() => mutateCallbacks().onSuccess({ id: "prj_notes" }));
-    expect(observer.onSettled).toHaveBeenLastCalledWith({
-      outcome: "succeeded",
-    });
-    expect(observer.onStarted).toHaveBeenCalledTimes(2);
-
-    act(() => result.current.openCreateDialog());
-    act(() => submit());
-    expect(observer.onStarted).toHaveBeenCalledTimes(2);
   });
 
   it("exposes every machine for the dialog's picker", () => {

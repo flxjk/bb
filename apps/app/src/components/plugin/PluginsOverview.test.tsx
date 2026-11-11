@@ -190,15 +190,6 @@ function installFetch(plugins: readonly unknown[] = [AUTOMATIONS_PLUGIN]) {
   );
 }
 
-function recordedTelemetryEvents(): unknown[] {
-  return vi
-    .mocked(fetch)
-    .mock.calls.filter(([input]) =>
-      String(input).endsWith("/api/v1/system/telemetry/events"),
-    )
-    .map(([, init]) => JSON.parse(String(init?.body)));
-}
-
 function LocationPath() {
   return <span data-testid="location-path">{useLocation().pathname}</span>;
 }
@@ -363,7 +354,6 @@ describe("PluginsOverview", () => {
       screen.getByRole("menuitem", { name: "Install from source" }),
     );
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(recordedTelemetryEvents()).toEqual([]);
 
     const catalogRequests = () =>
       vi.mocked(fetch).mock.calls.filter(([input]) => {
@@ -477,11 +467,6 @@ describe("PluginsOverview", () => {
     fireEvent.click(screen.getByRole("button", { name: "New plugin" }));
 
     expect(screen.getByTestId("location-path").textContent).toBe("/");
-    await waitFor(() =>
-      expect(recordedTelemetryEvents()).toEqual([
-        { name: "plugin_creation_started", properties: {} },
-      ]),
-    );
   });
 
   it("retains Direct install source filtering when sorting Installed", async () => {

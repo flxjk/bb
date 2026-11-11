@@ -240,6 +240,11 @@ export const BUILTIN_PLUGINS = [
     pluginId: "bb--github-star",
     defaultEnabled: true,
   },
+  {
+    name: "local-stack",
+    pluginId: "bb--local-stack",
+    defaultEnabled: true,
+  },
 ].map((plugin): BundledPluginDefinition => ({
   ...plugin,
   autoInstall: true,

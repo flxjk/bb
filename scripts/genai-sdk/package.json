@@ -1,0 +1,14 @@
+{
+  "name": "bb-genai-sdk-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Runnable scripts for the @google/genai JavaScript SDK: Gemini over the API key, with OpenViking memory as function calls.",
+  "scripts": {
+    "chat": "node chat.mjs",
+    "models": "node models.mjs",
+    "openviking": "node openviking.mjs"
+  },
+  "dependencies": {
+    "@google/genai": "^3.1.0"
+  }
+}

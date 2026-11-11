@@ -193,5 +193,4 @@ export const promptLibraryRpcContract = defineRpcContract({
     input: z.object({ id: z.string().min(1) }).strict(),
     output: z.null(),
   },
-  recordInsertion: { input: z.null(), output: z.null() },
 });

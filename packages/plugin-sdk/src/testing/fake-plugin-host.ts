@@ -1633,9 +1633,6 @@ function createFakePluginHostInternal(
   };
 
   const bb: BbPluginApi = {
-    internal_DO_NOT_USE_recordPluginUse() {
-      assertLive();
-    },
     pluginId,
     log,
     settings,

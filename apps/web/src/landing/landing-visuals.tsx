@@ -80,7 +80,6 @@ import {
   MOCK_WAIT_DONE_LEAD_S,
   MOCK_WORKING_AFTER_PROMPT_S,
 } from "./app-mock-parts";
-import { trackLandingEvent } from "./analytics";
 import { CommandButton } from "./command-button";
 import { DownloadLink, GitHubLink } from "./cta";
 import { useDesktopPlatform } from "./desktop-platform";
@@ -110,7 +109,7 @@ export function InstallOptions({ placement }: { placement: CtaPlacement }) {
     platform === "macos" ? "linux" : "macos";
   const simpleLinks = (
     <>
-      <OpenSourceLink placement={placement} />
+      <OpenSourceLink />
       {" · "}
       <a className="install-note-link" href={DOWNLOAD_PAGE_PATH}>
         Other platforms
@@ -151,12 +150,6 @@ export function InstallOptions({ placement }: { placement: CtaPlacement }) {
               command={CLI_COMMAND}
               label={`Copy browser install command: ${CLI_COMMAND}`}
               size="hero"
-              onCopy={() =>
-                trackLandingEvent({
-                  name: "landing_cli_command_copied",
-                  properties: { placement, command: CLI_COMMAND },
-                })
-              }
             />
             <span className="install-note">
               {platform !== "windows" && (
@@ -180,9 +173,9 @@ export function InstallOptions({ placement }: { placement: CtaPlacement }) {
   );
 }
 
-function OpenSourceLink({ placement }: { placement: CtaPlacement }) {
+function OpenSourceLink() {
   return (
-    <GitHubLink placement={placement} className="install-note-link oss-link">
+    <GitHubLink className="install-note-link oss-link">
       <HugeiconsIcon icon={GithubIcon} className="oss-ic" aria-hidden />
       Open source
     </GitHubLink>
