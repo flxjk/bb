@@ -493,7 +493,7 @@ function ForkSeedSurface({ composer }: { composer: NewThreadComposerState }) {
 
 function composerElement(
   seed: NewThreadRequest,
-  onSubmit: (request: NewThreadRequest) => void,
+  onSubmit: (request: NewThreadRequest) => void | Promise<void>,
   draftKey: string,
 ) {
   return (
@@ -516,7 +516,7 @@ function composerElement(
 
 function renderComposer(
   seed: NewThreadRequest,
-  onSubmit: (request: NewThreadRequest) => void,
+  onSubmit: (request: NewThreadRequest) => void | Promise<void>,
   draftKey: string,
 ) {
   return render(composerElement(seed, onSubmit, draftKey));
@@ -1193,7 +1193,9 @@ describe("PluginNewThreadComposer seeding", () => {
     const submitted: NewThreadRequest[] = [];
     renderComposer(
       STORED_REQUEST,
-      (request) => submitted.push(request),
+      (request) => {
+        submitted.push(request);
+      },
       "plugin-submission",
     );
 
@@ -1827,9 +1829,9 @@ describe("PluginNewThreadComposer seeding", () => {
         </QueryClientProvider>
       </Provider>,
     );
-    act(() =>
-      openPluginDetailsInWorkspace({ pluginId: "docs", title: "Docs" }),
-    );
+    act(() => {
+      openPluginDetailsInWorkspace({ pluginId: "docs", title: "Docs" });
+    });
     const command = screen.getByRole("button", { name: "Close panel command" });
     expect(command.dataset.activeDetail).toBe("docs");
     fireEvent.click(command);
@@ -2154,7 +2156,9 @@ describe("PluginNewThreadComposer seeding", () => {
     });
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
     expect(latestPromptBoxProps().value).toBe("");
-    act(() => latestPromptBoxProps().onChange("next thread", []));
+    act(() => {
+      latestPromptBoxProps().onChange("next thread", []);
+    });
     await act(async () => {
       failSubmit?.();
     });
@@ -3007,7 +3011,9 @@ describe("NewThreadComposer setSelection", () => {
     render(rootLikeElement("proj_1"));
     const host = currentHost();
     const initial = host.getSelection?.();
-    act(() => latestPromptBoxProps().execution.model.onChange("gpt-5.6-sol"));
+    act(() => {
+      latestPromptBoxProps().execution.model.onChange("gpt-5.6-sol");
+    });
     await waitFor(() => {
       expect(host.getSelection?.()?.model).toBe("gpt-5.6-sol");
     });

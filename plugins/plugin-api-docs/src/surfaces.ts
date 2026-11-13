@@ -85,9 +85,9 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "Add a navigation rail destination that opens a full page your plugin renders. With this, a plugin can:",
         bullets: [
           "Build dashboards, boards or inboxes with a custom sidebar on their own routes",
-          "Give the page a shareable URL, pane breadcrumbs and a focused window title",
+          "Give the page a shareable URL, its own title-bar title or breadcrumb, and a focused window title",
           "Add fixed tabs beside Browser and Terminal, and open terminals it started in any folder",
-          "Show a live count or dot on its navigation entry",
+          "Show a live count or dot on its navigation entry, or keep the page out of navigation and the palette",
         ],
         apiSymbols: [
           "PluginNavPanelRegistration",
@@ -102,6 +102,8 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "experimental_useFixedTabTarget",
           "ExperimentalFixedTabTargetState",
           "PluginNavPanelRegistration.experimental_usePageTitle",
+          "PluginNavPanelRegistration.experimental_headerTitle",
+          "PluginNavPanelRegistration.experimental_hideFromNavigation",
           "ExperimentalPageTitle",
           "ExperimentalPageBreadcrumb",
           "useBbContext",
@@ -232,6 +234,24 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
         experimental: true,
       },
       {
+        id: "thread-header-title",
+        title: "Thread header title",
+        summary:
+          "Replace the thread title text in the header of every thread pane. With this, a plugin can:",
+        bullets: [
+          "Show a project › workspace breadcrumb when a [header row](thread-header-row) shows the title",
+          "Put links and buttons in the title while bb keeps the thread menu, header buttons and pane controls",
+          "Step aside for bb's rename field while the user renames the thread",
+          "Fall back to bb's title on a crash; the first plugin in plugin order wins",
+        ],
+        apiSymbols: [
+          "PluginAppSlots.experimental_threadHeaderTitle",
+          "ExperimentalThreadHeaderTitleRegistration",
+          "ExperimentalThreadHeaderTitleProps",
+        ],
+        experimental: true,
+      },
+      {
         id: "thread-header",
         title: "Thread header buttons",
         summary:
@@ -273,6 +293,24 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "experimental_THREAD_ACTION_GROUPS",
         ],
         firstParty: ["Push notifications", "Thread list"],
+        experimental: true,
+      },
+      {
+        id: "thread-header-row",
+        title: "Rows under the thread header",
+        summary:
+          "Add a full-width row between a thread's header and its conversation. With this, a plugin can:",
+        bullets: [
+          "Show a tab strip of the threads that share the thread's environment",
+          "Stack with other plugins' rows in a set order, in every thread pane of a split layout",
+          "Open or switch the thread's side-panel tabs and navigate between threads",
+          "Take no space for a thread by rendering nothing; a crash removes only that row",
+        ],
+        apiSymbols: [
+          "PluginAppSlots.experimental_threadHeaderRow",
+          "ExperimentalThreadHeaderRowRegistration",
+          "ExperimentalThreadHeaderRowProps",
+        ],
         experimental: true,
       },
       {
@@ -1593,7 +1631,7 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "Use bb's own API from plugin server code. With this, a plugin can:",
         bullets: [
           "Create threads attributed to the plugin, send messages, and manage projects and machines",
-          "Start plugin updates in the background and follow their progress or rollback",
+          "Run plugin updates and provider CLI installs in the background and follow them to the end",
           "Find plugin releases outside the saved version range and change the range to take one",
           "Retry failed environment cleanup with recover: true after inspecting processes using the workspace",
         ],
@@ -1623,6 +1661,8 @@ export const SURFACE_GROUPS: SurfaceGroup[] = [
           "PluginBbSdk.plugins.experimental_pruneCache",
           "PluginBbSdk.plugins.experimental_startUpdate",
           "PluginBbSdk.plugins.experimental_updateJobs",
+          "PluginBbSdk.hosts.experimental_startProviderCliInstall",
+          "PluginBbSdk.hosts.experimental_providerCliInstallJobs",
           "PluginBbSdk.threads.queuedMessages.experimental_holdForEdit",
           "PluginBbSdk.threads.queuedMessages.experimental_releaseEditHold",
           "PluginBbSdk.threads.experimental_listDescendants",

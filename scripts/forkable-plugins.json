@@ -9,6 +9,7 @@
     "plugins/browser-automation",
     "plugins/composer",
     "plugins/concurrency-limit",
+    "plugins/conductor",
     "plugins/custom-instructions",
     "plugins/docs",
     "plugins/drafts",

@@ -208,7 +208,11 @@ export function EmailSignup() {
   }
 
   return (
-    <form className="subscribe-form" onSubmit={submit} noValidate>
+    <form
+      className="subscribe-form"
+      onSubmit={(event) => void submit(event)}
+      noValidate
+    >
       <input
         id={SUBSCRIBE_EMAIL_ID}
         className="subscribe-input"

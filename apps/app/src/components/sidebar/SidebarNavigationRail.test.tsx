@@ -462,6 +462,7 @@ describe("Rail", () => {
         path: "board",
         title: "Demo board",
         icon: "columns",
+        hideFromNavigation: false,
       },
     ]);
     renderRail(THREAD_PATH);
@@ -499,6 +500,7 @@ describe("Rail", () => {
         path: "board",
         title: "Ghost board",
         icon: "columns",
+        hideFromNavigation: false,
       },
     ]);
     renderRail(THREAD_PATH);
@@ -597,16 +599,24 @@ describe("Rail", () => {
     vi.useFakeTimers();
     renderRail(THREAD_PATH, { isCompactViewport: true, useLayout: true });
     fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
-    act(() => vi.advanceTimersByTime(250));
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "1 update available" }));
-    act(() => vi.advanceTimersByTime(250));
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
     fireEvent.click(screen.getByRole("link", { name: "Details" }));
     expect(pathname()).toBe(`${SETTINGS_ROUTE_PATH}/updates`);
-    act(() => vi.advanceTimersByTime(250));
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
-    act(() => vi.advanceTimersByTime(250));
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
     fireEvent.click(railButton("Home"));
 
     expect(pathname()).toBe(THREAD_PATH);
@@ -771,6 +781,50 @@ describe("Rail", () => {
     });
 
     expect(railLabels()).toEqual(["Home", "Plugins", "More", "Settings"]);
+  });
+
+  it("leaves a panel hidden from navigation out of the rail, More, and the remembered chrome", async () => {
+    resetPluginSlotStoreForTest();
+    resetPluginFrontendBootStateForTest();
+    await registerNavigationPlugin();
+    writeLastKnownPluginNavPanelChrome([
+      {
+        pluginId: "drafts",
+        id: "new-chat",
+        path: "new-chat",
+        title: "New chat here",
+        icon: "Chat",
+        hideFromNavigation: true,
+      },
+    ]);
+    renderRail(THREAD_PATH);
+    expect(railLabels()).not.toContain("New chat here");
+
+    act(() => {
+      setPluginSlotRegistrations(
+        "drafts",
+        registrationSet({
+          navPanels: [
+            {
+              id: "new-chat",
+              title: "New chat here",
+              icon: "Chat",
+              path: "new-chat",
+              component: () => null,
+              experimental_hideFromNavigation: true,
+            },
+          ],
+        }),
+      );
+      markPluginFrontendsSettled();
+    });
+
+    expect(railLabels()).not.toContain("New chat here");
+    fireEvent.keyDown(railButton("More"), { key: "Enter" });
+    await screen.findByRole("menuitem", { name: "Search threads" });
+    expect(
+      screen.queryByRole("menuitem", { name: "New chat here" }),
+    ).toBeNull();
   });
 
   it("keeps hidden destinations reachable from More", async () => {

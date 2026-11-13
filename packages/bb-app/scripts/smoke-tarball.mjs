@@ -303,7 +303,7 @@ async function retryPortCollisions(label, run) {
 }
 
 async function waitForHttp({
-  acceptResponse = () => true,
+  acceptResponse = async () => true,
   label,
   portCollisionLogPaths = [],
   processRef,

@@ -329,6 +329,7 @@ export const installedPlugins = sqliteTable("plugins", {
   lastFailureVersion: text("last_failure_version"),
   lastFailureAt: integer("last_failure_at"),
   lastFailureDetail: text("last_failure_detail"),
+  lastFailureLabel: text("last_failure_label"),
   activeArtifactId: text("active_artifact_id").references(
     (): AnySQLiteColumn => pluginArtifacts.id,
   ),
@@ -424,6 +425,7 @@ export const pluginStateSnapshots = sqliteTable(
       ],
     }).notNull(),
     rollbackCandidateVersion: text("rollback_candidate_version"),
+    rollbackCandidateLabel: text("rollback_candidate_label"),
     rollbackSourceFingerprint: text("rollback_source_fingerprint"),
     rollbackBbVersion: text("rollback_bb_version"),
     rollbackSdkVersion: text("rollback_sdk_version"),
@@ -511,6 +513,9 @@ export const projectSources = sqliteTable(
       table.projectId,
       table.hostId,
     ),
+    uniqueIndex("project_sources_default_project_idx")
+      .on(table.projectId)
+      .where(sql`${table.isDefault} = 1`),
     check(
       "project_sources_shape_check",
       sql`(

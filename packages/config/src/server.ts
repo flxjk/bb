@@ -29,6 +29,7 @@ import {
   BB_APP_UPDATE_MODE_ENV,
   BB_CLI_LAUNCHER_ENV,
   BB_PERF_DIAGNOSTICS_ENV,
+  BB_QUERY_PLAN_AUDIT_ENV,
   BB_SKIP_ONBOARDING_ENV,
   BB_SETUP_GUIDE_VARIANT_ENV,
   DEFAULT_BB_APP_URL,
@@ -65,6 +66,7 @@ export interface ServerConfig
   BB_APP_UPDATE_MODE?: AppUpdateMode;
   BB_CLI_LAUNCHER?: string;
   BB_PERF_DIAGNOSTICS: boolean;
+  BB_QUERY_PLAN_AUDIT: boolean;
   BB_SKIP_ONBOARDING: boolean;
   BB_SETUP_GUIDE_VARIANT?: SetupGuideVariant;
   featureFlags: FeatureFlags;
@@ -164,6 +166,12 @@ export function loadServerConfig(
     BB_PERF_DIAGNOSTICS: readEnvVarWithDefault({
       context: loader.context,
       definition: BB_PERF_DIAGNOSTICS_ENV,
+      env: loader.env,
+      defaultValue: false,
+    }),
+    BB_QUERY_PLAN_AUDIT: readEnvVarWithDefault({
+      context: loader.context,
+      definition: BB_QUERY_PLAN_AUDIT_ENV,
       env: loader.env,
       defaultValue: false,
     }),
