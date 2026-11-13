@@ -277,7 +277,10 @@ describe("OpenVikingClient payload parsing", () => {
       }),
     }));
 
-    const result = await clientFor(gateway).search("reasonix", { limit: 5 });
+    const result = await clientFor(gateway).search("reasonix", {
+      limit: 5,
+      targetUri: "viking://user/default/memories",
+    });
 
     expect(result.entries).toEqual([]);
     expect(result.retrievalErrors).toEqual([
@@ -286,6 +289,7 @@ describe("OpenVikingClient payload parsing", () => {
     expect(JSON.parse(gateway.requests[0]?.body ?? "{}")).toEqual({
       query: "reasonix",
       limit: 5,
+      target_uri: "viking://user/default/memories",
     });
   });
 

@@ -19,6 +19,44 @@ describe("the pi plugin's environment passthrough", () => {
       passthrough: ["BB_PI_BRIDGE_COMMAND", "BB_PI_BRIDGE_ARGS"],
     });
   });
+
+  it("keeps the OpenAI Platform key secret and contributes it only when configured", async () => {
+    const emptyHost = createFakePluginHost({ pluginId: "provider-pi" });
+    piPlugin(emptyHost.bb);
+    expect(
+      emptyHost.harness.registrations.settingsDescriptors.openaiApiKey,
+    ).toMatchObject({
+      type: "string",
+      secret: true,
+      default: "",
+    });
+    await expect(
+      emptyHost.harness.resolveProviderEnv("pi", {
+        hostId: "host-1",
+        projectId: null,
+        threadId: null,
+      }),
+    ).resolves.toEqual([]);
+
+    const configuredHost = createFakePluginHost({
+      pluginId: "provider-pi",
+      settings: { openaiApiKey: "platform-test-key" },
+    });
+    piPlugin(configuredHost.bb);
+    await expect(
+      configuredHost.harness.resolveProviderEnv("pi", {
+        hostId: "host-1",
+        projectId: null,
+        threadId: null,
+      }),
+    ).resolves.toEqual([
+      {
+        name: "OPENAI_API_KEY",
+        value: "platform-test-key",
+        reason: "OpenAI Platform API key configured in Pi provider settings",
+      },
+    ]);
+  });
 });
 
 describe("the pi plugin's skill roots", () => {

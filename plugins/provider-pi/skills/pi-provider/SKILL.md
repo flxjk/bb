@@ -11,3 +11,6 @@ commands. Inspect the thread first and use live command help for arguments.
 Provider confirmation determines whether the operation completed.
 
 Use the target host's provider catalog for available models and execution options.
+The optional OpenAI Platform API key is configured in the Pi provider's plugin
+settings; bb stores it as a secret and passes it to Pi only when configured.
+OpenAI Codex, Gemini API, and Antigravity are separate provider routes.

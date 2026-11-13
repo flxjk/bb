@@ -354,13 +354,14 @@ export class OpenVikingClient {
 
   async search(
     query: string,
-    options: { limit?: number; mode?: string } = {},
+    options: { limit?: number; mode?: string; targetUri?: string } = {},
   ): Promise<OpenVikingSearchResult> {
     const body: Record<string, unknown> = {
       query,
       limit: options.limit ?? 10,
     };
     if (options.mode !== undefined) body.mode = options.mode;
+    if (options.targetUri !== undefined) body.target_uri = options.targetUri;
     const result = await this.envelope<unknown>("/api/v1/search/search", {
       method: "POST",
       body: JSON.stringify(body),

@@ -475,6 +475,9 @@ with a `null` thread and project. Each entry is a literal or a
 server-relative path the host expands. Conflicts resolve in plugin load
 order, and the values override the shell environment.
 
+The Pi provider uses this resolver to pass its optional stored OpenAI Platform
+API key to model discovery and thread processes through the same path.
+
 Docs: `providers.md`.
 
 **Audit before stabilizing.**

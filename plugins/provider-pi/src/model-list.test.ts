@@ -85,8 +85,8 @@ describe("pi model list", () => {
     );
   });
 
-  it("keeps the provider prefix on aggregator models whose id has a slash", () => {
-    const { models } = buildPiAvailableModels({
+  it("keeps dated OpenRouter models in the picker and preserves aggregator ids", () => {
+    const { models, selectedOnlyModels } = buildPiAvailableModels({
       models: [
         {
           id: "deepseek/deepseek-v4-flash-0731",
@@ -99,6 +99,14 @@ describe("pi model list", () => {
         {
           id: "openai/gpt-5.1-codex",
           name: "GPT-5.1 Codex",
+          provider: "openrouter",
+          reasoning: true,
+          input: ["text"],
+          supportedThinkingLevels: ["low", "medium", "high"],
+        },
+        {
+          id: "anthropic/claude-sonnet-4-20261112",
+          name: "Claude Sonnet 4 (2026-11-12)",
           provider: "openrouter",
           reasoning: true,
           input: ["text"],
@@ -118,11 +126,11 @@ describe("pi model list", () => {
     expect(models.map((model) => model.id)).toEqual([
       "openrouter/deepseek/deepseek-v4-flash-0731",
       "openrouter/openai/gpt-5.1-codex",
+      "openrouter/anthropic/claude-sonnet-4-20261112",
       "fireworks/accounts/fireworks/models/deepseek-v4-flash",
     ]);
-    expect(models.find((model) => model.isDefault)?.id).toBe(
-      "openrouter/openai/gpt-5.1-codex",
-    );
+    expect(selectedOnlyModels).toHaveLength(0);
+    expect(models.find((model) => model.isDefault)?.id).toBe(models[0]?.id);
   });
 
   it("restricts and orders the picker using Pi's workspace model scope", () => {

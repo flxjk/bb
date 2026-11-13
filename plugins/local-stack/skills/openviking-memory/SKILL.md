@@ -16,7 +16,8 @@ this host.
 ## Tools
 
 - `openviking_search` — find memories and resources. Falls back to a content
-  search when semantic retrieval is unavailable.
+  search when semantic retrieval is unavailable. A supplied `uri` restricts
+  both semantic retrieval and fallback to that subtree.
 - `openviking_read` — read one file in full, or its `abstract` / `overview`.
 - `openviking_ls` — list a directory.
 - `openviking_remember` — write a durable memory.

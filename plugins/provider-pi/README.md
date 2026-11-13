@@ -68,6 +68,13 @@ install in a temporary prefix, say. The plugin declares them as environment
 passthrough, so a value set on the host daemon's environment reaches the
 bridge process; bb strips every other inherited `BB_*` variable.
 
+The optional `openaiApiKey` setting is a secret for OpenAI Platform API access.
+When set, bb supplies it to Pi as `OPENAI_API_KEY` for both model discovery and
+thread sessions. When it is empty, Pi keeps using its own OpenAI authentication.
+This does not change the separate OpenAI Codex provider or Gemini API route.
+OpenRouter models, including date-versioned IDs, stay in the model picker and
+follow the live Pi catalog instead of a hard-coded OpenRouter default.
+
 ## Bridge channel
 
 Besides pi's RPC stdin and stdout, the injected extension talks to the bridge

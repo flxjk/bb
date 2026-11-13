@@ -14,7 +14,9 @@ tool failure reads as the gateway's diagnosis rather than a generic throw.
 
 Search falls back to a literal content search when semantic retrieval is
 unavailable — a local gateway with no embedding model answers `search` with a
-retrieval error and no entries, and that is a usable state, not a failure.
+retrieval error and no entries, and that is a usable state, not a failure. A
+requested `viking://` subtree is applied to semantic retrieval and to the
+literal fallback.
 
 ## Local agents
 

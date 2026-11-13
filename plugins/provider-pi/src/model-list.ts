@@ -35,7 +35,8 @@ interface BuildPiAvailableModelsResult {
 
 const DATE_SUFFIX_PATTERN = /-\d{8}$/;
 
-function isModelAlias(id: string): boolean {
+function isModelAlias(provider: string, id: string): boolean {
+  if (provider === "openrouter") return true;
   if (id.endsWith("-latest")) return true;
   return !DATE_SUFFIX_PATTERN.test(id);
 }
@@ -86,7 +87,7 @@ export function buildPiAvailableModels(
   const selectedOnlyModels: AvailableModel[] = [];
   for (const model of sourceModels) {
     const built = buildPiAvailableModel(model);
-    if (isModelAlias(model.id) || scopedIds?.has(built.id)) {
+    if (isModelAlias(model.provider, model.id) || scopedIds?.has(built.id)) {
       models.push(built);
     } else {
       selectedOnlyModels.push(built);
@@ -147,7 +148,6 @@ const PI_DEFAULT_MODEL_PER_PROVIDER: Partial<Record<string, string>> = {
   google: "gemini-2.5-pro",
   "google-gemini-cli": "gemini-2.5-pro",
   "google-vertex": "gemini-3-pro-preview",
-  openrouter: "openai/gpt-5.1-codex",
   "vercel-ai-gateway": "anthropic/claude-opus-4.8",
   xai: "grok-4-fast-non-reasoning",
   mistral: "devstral-medium-latest",

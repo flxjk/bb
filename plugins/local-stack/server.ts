@@ -196,7 +196,10 @@ export default async function openvikingPlugin(bb: BbPluginApi): Promise<void> {
       const scope = uri ?? DEFAULT_MEMORY_ROOT;
       const bounded = limit ?? DEFAULT_LIMIT;
       try {
-        const result = await client.search(query, { limit: bounded });
+        const result = await client.search(query, {
+          limit: bounded,
+          ...(uri === undefined ? {} : { targetUri: uri }),
+        });
         if (result.entries.length > 0) return formatSearch(result);
       } catch (error) {
         if (!(error instanceof OpenVikingError)) throw error;
@@ -494,7 +497,12 @@ export default async function openvikingPlugin(bb: BbPluginApi): Promise<void> {
             const limit = input.options.limit;
             let result: OpenVikingSearchResult | null = null;
             try {
-              result = await client.search(query, { limit });
+              result = await client.search(query, {
+                limit,
+                ...(input.options.uri === undefined
+                  ? {}
+                  : { targetUri: input.options.uri }),
+              });
             } catch (error) {
               if (!(error instanceof OpenVikingError)) throw error;
             }

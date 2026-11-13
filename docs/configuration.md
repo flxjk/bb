@@ -1141,6 +1141,17 @@ Two host-daemon environment variables reach the Claude Code bridge:
 such as a CI runner (mint it with `claude setup-token`). See the
 `claude-code-provider` skill.
 
+### Pi provider
+
+| Setting        | Default | Effect                                                                                                                             |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `openaiApiKey` | empty   | Optional OpenAI Platform API key. Stored as a plugin secret and passed to Pi as `OPENAI_API_KEY` for model discovery and sessions. |
+
+Set it on the Pi provider's page under Settings → Installed plugins. An empty
+value leaves Pi's existing OpenAI authentication in place. This key is separate
+from the OpenAI Codex provider's sign-in and the Google Gemini API route. The
+Antigravity CLI (`agy`) remains a separate ACP provider.
+
 ### Local Stack
 
 The builtin Local Stack plugin keeps a bb install self-contained: OpenViking
@@ -1173,7 +1184,8 @@ every optional ACP request a fully interactive agent does.
 The plugin polls the gateway's health every 30 seconds and adds a standing
 instruction to threads only while it answers. When OpenViking has no local
 embedding model, `openviking_search` reports the retrieval error and falls back
-to a literal content search, which still works.
+to a literal content search, which still works. Supplying `uri` restricts both
+semantic and literal search to that `viking://` subtree.
 
 Thread titles and commit messages can run on any of four AI services, chosen per
 task in Settings → AI services:
