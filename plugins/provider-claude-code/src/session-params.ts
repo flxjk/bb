@@ -274,7 +274,8 @@ export function buildClaudeTurnParams(
     ...(config ? { config } : {}),
     permissionMode: toClaudePermissionMode(args.options),
     permissionScope: args.options.permissionScope,
-    additionalWorkspaceWriteRoots: providerOptions.additionalWorkspaceWriteRoots ?? [],
+    additionalWorkspaceWriteRoots:
+      providerOptions.additionalWorkspaceWriteRoots ?? [],
     permissionEscalation: args.options.permissionEscalation,
     ...(providerOptions.claudeCodePermissionMode !== undefined
       ? { claudeCodePermissionMode: providerOptions.claudeCodePermissionMode }

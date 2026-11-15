@@ -4605,6 +4605,47 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@22.20.5)(@typescript/typescript6@6.0.2))(vite@8.3.6(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
 
+  plugins/gemini-api:
+    dependencies:
+      '@google/genai':
+        specifier: ^3.1.0
+        version: 3.3.0(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))
+    devDependencies:
+      '@get-bb/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      tsrs:
+        specifier: 0.18.0-ts7.1.0-dev.20260929
+        version: 0.18.0-ts7.1.0-dev.20260929
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@22.20.5)(typescript@6.0.3))(vite@8.3.6(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  plugins/gemini-bridge:
+    dependencies:
+      '@get-bb/plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+      '@google/genai':
+        specifier: ^3.1.0
+        version: 3.3.0(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      tsrs:
+        specifier: 0.18.0-ts7.1.0-dev.20260929
+        version: 0.18.0-ts7.1.0-dev.20260929
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@22.20.5)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.4.0))(msw@2.15.0(@types/node@22.20.5)(typescript@6.0.3))(vite@8.3.6(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
   plugins/git:
     dependencies:
       '@bb/async-cache':
@@ -8376,6 +8417,15 @@ packages:
   '@google/genai@1.52.0':
     resolution: {integrity: sha512-gwSvbpiN/17O9TbsqSsE/OzZcpv5Fo4RQjdngGgogtuB9RsyJ8ZHhX5KjHj1bp5N9snN2eK8LDGXSaWW2hof8Q==}
     engines: {node: '>=20.0.0'}
+    peerDependencies:
+      '@modelcontextprotocol/sdk': ^1.25.2
+    peerDependenciesMeta:
+      '@modelcontextprotocol/sdk':
+        optional: true
+
+  '@google/genai@3.3.0':
+    resolution: {integrity: sha512-XLjXedj0X8UrULZz1GnlTMSQxBDFdr+NCKZkOBaSVVYqmK30C6FCnKW31Ppn0ItO9DpNspCHFui257kPNpumKQ==}
+    engines: {node: '>=22.0.0'}
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
     peerDependenciesMeta:
@@ -20468,6 +20518,19 @@ snapshots:
   '@fontsource-variable/inter@5.3.0': {}
 
   '@google/genai@1.52.0(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))':
+    dependencies:
+      google-auth-library: 10.9.1
+      p-retry: 4.6.2
+      protobufjs: 7.6.6
+      ws: 8.22.1
+    optionalDependencies:
+      '@modelcontextprotocol/sdk': 1.32.2(zod@4.6.7)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  '@google/genai@3.3.0(@modelcontextprotocol/sdk@1.32.2(zod@4.6.7))':
     dependencies:
       google-auth-library: 10.9.1
       p-retry: 4.6.2

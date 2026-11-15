@@ -59,7 +59,7 @@ describe("forkClaudeSession", () => {
       "w",
     );
     let parentUuid: string | null = null;
-    for (let bytes = 0; bytes < 128 * 1024 * 1024; ) {
+    for (let bytes = 0; bytes < 128 * 1024 * 1024;) {
       const uuid = randomUUID();
       const line = `${JSON.stringify({
         type: "user",

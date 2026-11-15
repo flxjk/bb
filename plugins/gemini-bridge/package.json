@@ -1,0 +1,45 @@
+{
+  "name": "bb-plugin-gemini-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gemini threads in bb through the official @google/genai SDK: a native provider bridge with model discovery, streaming, function calling and typed recovery hints, and no CLI subprocess.",
+  "engines": {
+    "bb": ">=0.0",
+    "bbPluginSdk": ">=0.4.102"
+  },
+  "bb": {
+    "name": "Gemini (native API bridge)",
+    "description": "Gemini threads in bb through the official @google/genai SDK: a native provider bridge with model discovery, streaming, function calling and typed recovery hints, and no CLI subprocess.",
+    "branding": {
+      "icon": "Sparkles"
+    },
+    "server": "./server.ts",
+    "host": "./host.ts",
+    "experimental_providers": [
+      {
+        "kind": "agent",
+        "id": "gemini-bridge",
+        "displayName": "Gemini (API bridge)"
+      }
+    ]
+  },
+  "keywords": [
+    "bb-plugin"
+  ],
+  "scripts": {
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsrs --noEmit",
+    "lint": "oxlint --ignore-pattern node_modules --ignore-pattern dist ."
+  },
+  "dependencies": {
+    "@get-bb/plugin-sdk": "workspace:*",
+    "@google/genai": "^3.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
+    "vitest": "^4.1.12"
+  }
+}

@@ -69,13 +69,25 @@ describe("buildClaudeCodeModels", () => {
         displayName: "Opus 5.5 (1M)",
         isDefault: true,
       },
+      {
+        model: "opus[1m]",
+        displayName: "Opus (1M context) alias",
+        isDefault: false,
+      },
       { model: "claude-fable-5-1", displayName: "Fable 5.1", isDefault: false },
+      {
+        model: "claude-fable-5-1[1m]",
+        displayName: "Fable alias",
+        isDefault: false,
+      },
       { model: "claude-sonnet-5", displayName: "Sonnet 5", isDefault: false },
+      { model: "sonnet", displayName: "Sonnet alias", isDefault: false },
       {
         model: "claude-haiku-4-5-20251001",
         displayName: "Haiku 4.5",
         isDefault: false,
       },
+      { model: "haiku", displayName: "Haiku alias", isDefault: false },
       {
         model: "claude-custom-eap[1m]",
         displayName: "claude-custom-eap[1m]",
@@ -84,20 +96,27 @@ describe("buildClaudeCodeModels", () => {
     ]);
   });
 
-  it("keeps Claude Code aliases selectable without listing them as models", () => {
+  it("lists Claude Code aliases as models instead of a second list", () => {
     const result = buildClaudeCodeModels(DISCOVERED_MODELS);
 
-    expect(
-      result.selectedOnlyModels.map((model) => ({
-        model: model.model,
-        displayName: model.displayName,
-      })),
-    ).toEqual([
-      { model: "opus[1m]", displayName: "Opus (1M context) alias" },
-      { model: "claude-fable-5-1[1m]", displayName: "Fable alias" },
-      { model: "sonnet", displayName: "Sonnet alias" },
-      { model: "haiku", displayName: "Haiku alias" },
-    ]);
+    expect(result.selectedOnlyModels).toEqual([]);
+    expect(result.models.map((model) => model.model)).toEqual(
+      expect.arrayContaining(["opus[1m]", "sonnet", "haiku"]),
+    );
+    expect(new Set(result.models.map((model) => model.model)).size).toBe(
+      result.models.length,
+    );
+  });
+
+  it("keeps each alias display name distinct from the version it resolves to", () => {
+    const result = buildClaudeCodeModels(DISCOVERED_MODELS);
+    const displayName = (model: string) =>
+      result.models.find((candidate) => candidate.model === model)?.displayName;
+
+    expect(displayName("sonnet")).toBe("Sonnet alias");
+    expect(displayName("claude-sonnet-5")).toBe("Sonnet 5");
+    expect(displayName("haiku")).toBe("Haiku alias");
+    expect(displayName("claude-haiku-4-5-20251001")).toBe("Haiku 4.5");
   });
 
   it("maps reported effort levels, adding ultracode alongside xhigh", () => {

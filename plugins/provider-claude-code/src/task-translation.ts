@@ -355,8 +355,7 @@ export function translateClaudeTaskMessage(
     if (patch.error !== undefined) {
       task.error = patch.error;
     }
-    const movedToBackground =
-      patch.is_backgrounded === true && task.foreground;
+    const movedToBackground = patch.is_backgrounded === true && task.foreground;
     if (movedToBackground) {
       task.foreground = false;
     }

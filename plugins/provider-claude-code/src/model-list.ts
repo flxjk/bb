@@ -83,45 +83,37 @@ export function buildClaudeCodeModels(
     discoveredModels.find((modelInfo) => modelInfo.value === "default")
       ?.resolvedModel ?? null;
   const models: AvailableModel[] = [];
+  const listed = new Set<string>();
   for (const modelInfo of [
     ...discoveredModels.filter((candidate) => candidate.value !== "default"),
     ...discoveredModels.filter((candidate) => candidate.value === "default"),
   ]) {
     const model = modelInfo.resolvedModel ?? modelInfo.value;
-    if (models.some((candidate) => candidate.model === model)) {
-      continue;
+    if (!listed.has(model)) {
+      listed.add(model);
+      models.push(
+        buildModel(
+          modelInfo,
+          model,
+          deriveClaudeModelDisplayName(model) ?? modelInfo.displayName,
+        ),
+      );
     }
-    models.push(
-      buildModel(
-        modelInfo,
-        model,
-        deriveClaudeModelDisplayName(model) ?? modelInfo.displayName,
-      ),
-    );
-  }
-  const selectedOnlyModels: AvailableModel[] = [];
-  for (const modelInfo of discoveredModels) {
     const alias = modelInfo.value;
-    if (
-      alias === "default" ||
-      models.some((candidate) => candidate.model === alias) ||
-      selectedOnlyModels.some((candidate) => candidate.model === alias)
-    ) {
+    if (alias === "default" || listed.has(alias)) {
       continue;
     }
-    selectedOnlyModels.push(
-      buildModel(modelInfo, alias, `${modelInfo.displayName} alias`),
-    );
+    listed.add(alias);
+    models.push(buildModel(modelInfo, alias, `${modelInfo.displayName} alias`));
   }
   const resolvedDefault =
-    defaultModel !== null &&
-    models.some((candidate) => candidate.model === defaultModel)
+    defaultModel !== null && listed.has(defaultModel)
       ? defaultModel
       : models[0]?.model;
   return {
     models: models.map((model) =>
       model.model === resolvedDefault ? { ...model, isDefault: true } : model,
     ),
-    selectedOnlyModels,
+    selectedOnlyModels: [],
   };
 }

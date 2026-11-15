@@ -3685,7 +3685,9 @@ describe("bridge", () => {
     });
     expect(models.map((model) => model.model)).toEqual([
       "claude-opus-5[1m]",
+      "opus[1m]",
       "claude-sonnet-5",
+      "sonnet",
     ]);
     expect(models.filter((model) => model.isDefault)).toEqual([
       expect.objectContaining({
@@ -3693,10 +3695,10 @@ describe("bridge", () => {
         displayName: "Opus 5 (1M)",
       }),
     ]);
-    expect(selectedOnlyModels.map((model) => model.model)).toEqual([
-      "opus[1m]",
-      "sonnet",
-    ]);
+    expect(models.find((model) => model.model === "sonnet")?.displayName).toBe(
+      "Sonnet alias",
+    );
+    expect(selectedOnlyModels).toEqual([]);
     expect(queryMock).toHaveBeenCalledWith({
       prompt: expect.anything(),
       options: expect.objectContaining({
@@ -3766,7 +3768,14 @@ describe("bridge", () => {
     };
 
     await expect(listClaudeCodeBridgeModels(env)).resolves.toMatchObject({
-      models: [expect.objectContaining({ model: "claude-sonnet-5" })],
+      models: [
+        expect.objectContaining({ model: "claude-sonnet-5" }),
+        expect.objectContaining({
+          model: "sonnet",
+          displayName: "Sonnet alias",
+        }),
+      ],
+      selectedOnlyModels: [],
     });
     expect(queryMock).toHaveBeenCalledTimes(2);
     expect(queryMock.mock.calls[1]?.[0]?.options.env).toEqual({

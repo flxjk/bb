@@ -1,0 +1,36 @@
+{
+  "name": "bb-plugin-gemini-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gemini through the AI Studio API key: thread titles and commit messages straight from Google's OpenAI-compatible endpoint.",
+  "engines": {
+    "bb": ">=0.0",
+    "bbPluginSdk": ">=0.4.102"
+  },
+  "bb": {
+    "name": "Gemini API",
+    "description": "Gemini through the AI Studio API key: thread titles and commit messages straight from Google's OpenAI-compatible endpoint.",
+    "branding": {
+      "icon": "AiContentGenerator01"
+    },
+    "server": "./server.ts"
+  },
+  "keywords": [
+    "bb-plugin"
+  ],
+  "scripts": {
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsrs --noEmit",
+    "lint": "oxlint --ignore-pattern node_modules --ignore-pattern dist ."
+  },
+  "dependencies": {
+    "@google/genai": "^3.1.0"
+  },
+  "devDependencies": {
+    "@get-bb/plugin-sdk": "workspace:*",
+    "@types/node": "^22.20.5",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
+    "vitest": "^4.1.12"
+  }
+}

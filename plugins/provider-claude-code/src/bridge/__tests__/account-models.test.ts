@@ -123,16 +123,15 @@ describe("pooled Claude account models", () => {
       ["claude-opus-5-5", true, "For complex work and everyday tasks"],
       ["claude-fable-5-2", false, "claude-fable-5-2"],
       ["claude-fable-5-1", false, "Fable 5.1"],
+      ["opus", false, "For complex work and everyday tasks"],
+      ["claude-fable-5-1[1m]", false, "Fable 5.1"],
     ]);
     expect(
       models[1]?.supportedReasoningEfforts.map(
         (effort) => effort.reasoningEffort,
       ),
     ).toEqual(["high", "xhigh", "ultracode"]);
-    expect(selectedOnlyModels.map((model) => model.model)).toEqual([
-      "opus",
-      "claude-fable-5-1[1m]",
-    ]);
+    expect(selectedOnlyModels).toEqual([]);
     expect(hub.requests).toEqual([
       {
         url: "/hub/claude/v1/models?limit=1000",
