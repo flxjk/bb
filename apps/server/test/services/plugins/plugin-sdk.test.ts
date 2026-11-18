@@ -1381,7 +1381,11 @@ describe("plugin bb.sdk against a running server", () => {
           mode: "auto",
           input: [{ type: "text", text: "Continue", mentions: [] }],
         }),
-      ).resolves.toEqual({ ok: true, delivery: "sent" });
+      ).resolves.toEqual({
+        ok: true,
+        delivery: "sent",
+        messageSequence: expect.any(Number),
+      });
       const stopPromise = api.sdk.threads.stop({ threadId: operable.id });
       const stop = await waitForQueuedCommand(
         server,

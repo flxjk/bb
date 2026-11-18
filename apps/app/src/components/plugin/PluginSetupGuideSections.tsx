@@ -1,4 +1,4 @@
-import { usePluginSlots } from "@/lib/plugin-slots";
+import { usePluginSlotKind } from "@/lib/plugin-slots";
 import { PluginSlotMount } from "./PluginSlotMount";
 
 export function PluginSetupGuideSections({
@@ -8,7 +8,7 @@ export function PluginSetupGuideSections({
   pluginId: string;
   onPhone: boolean;
 }) {
-  const { setupGuideSections } = usePluginSlots();
+  const setupGuideSections = usePluginSlotKind("setupGuideSections");
   const sections = setupGuideSections.filter(
     (section) => section.pluginId === pluginId,
   );

@@ -12,6 +12,7 @@ import {
   resolveExperiments,
   withExperimentHeaders,
 } from "./experiments/server";
+import { proxyPostHogRequest } from "./landing/posthog-proxy";
 import {
   marketplaceHtmlCacheControl,
   marketplaceResponseStatus,
@@ -45,6 +46,7 @@ const postHogKey: string | undefined = import.meta.env.VITE_POSTHOG_KEY;
 const postHogHost: string =
   import.meta.env.VITE_POSTHOG_HOST ?? "https://us.i.posthog.com";
 const DEFINITIONS_CACHE = "posthog-flag-definitions";
+const PROXY_CACHE = "posthog-proxy-assets";
 let flagDefinitions: FlagDefinitionsSource | null | undefined;
 
 function logEntry(entry: object): void {
@@ -60,7 +62,7 @@ function flagDefinitionsSource(): FlagDefinitionsSource | null {
             host: postHogHost,
             projectKey: postHogKey,
             secretKey: env.POSTHOG_FLAGS_SECRET_KEY,
-            cacheKey: `https://${env.BASE_DOMAIN}/__experiments/posthog-flag-definitions`,
+            cacheKey: `https://${env.BASE_DOMAIN}/__experiments/posthog-flag-definitions/${encodeURIComponent(postHogKey)}`,
             fetch: (input, init) => fetch(input, init),
             log: logEntry,
             sharedCache: {
@@ -68,6 +70,8 @@ function flagDefinitionsSource(): FlagDefinitionsSource | null {
                 (await caches.open(DEFINITIONS_CACHE)).match(key),
               put: async (key, response) =>
                 (await caches.open(DEFINITIONS_CACHE)).put(key, response),
+              delete: async (key) =>
+                (await caches.open(DEFINITIONS_CACHE)).delete(key),
             },
           })
         : null;
@@ -81,6 +85,16 @@ export default {
     _env: unknown,
     ctx: ExecutionContext,
   ): Promise<Response> {
+    const proxied = await proxyPostHogRequest(request, {
+      fetch: (input, init) => fetch(input, init),
+      cache: {
+        match: async (key) => (await caches.open(PROXY_CACHE)).match(key),
+        put: async (key, response) =>
+          (await caches.open(PROXY_CACHE)).put(key, response),
+      },
+      waitUntil: (promise) => ctx.waitUntil(promise),
+    });
+    if (proxied) return proxied;
     const definitions = flagDefinitionsSource();
     const resolution = await resolveExperiments(request, {
       postHogKey,

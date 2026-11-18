@@ -922,6 +922,7 @@ describe("pending interaction lifecycle", () => {
         const opened = await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -939,6 +940,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: [],
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -955,6 +957,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: [],
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [thread.id],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -999,6 +1002,7 @@ describe("pending interaction lifecycle", () => {
         const opened = await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -1039,6 +1043,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: opened,
@@ -1068,6 +1073,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: [],
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -1089,6 +1095,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -1116,6 +1123,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -1172,6 +1180,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [thread.id],
           hostId: host.id,
           openedSession: seedSession(harness.deps, host.id),
@@ -1198,6 +1207,7 @@ describe("pending interaction lifecycle", () => {
         await handleHostSessionOpened(harness.deps, {
           activeThreads: [],
           openThreadWork: stillWaiting(thread.id),
+          turnCommandThreadIds: [],
           undeliveredEventThreadIds: [],
           hostId: host.id,
           openedSession: opened,

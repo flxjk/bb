@@ -5,6 +5,55 @@ import { usePromptDraftController } from "@/hooks/usePromptDraftStorage";
 import { useImportedProjectDefault } from "@/lib/root-compose-selection";
 import type { OnboardingEntry } from "./onboarding-model";
 
+interface ProjectImportLifetime {
+  active: boolean;
+  canSelect: boolean;
+}
+
+async function runProjectImport({
+  lifetime,
+  hostId,
+  repos,
+  createProject,
+  setImportedProjectDefault,
+  setImporting,
+  onSettled,
+  onContinue,
+}: {
+  lifetime: ProjectImportLifetime;
+  hostId: string;
+  repos: readonly { name: string; path: string }[];
+  createProject: ReturnType<typeof useCreateProject>["mutateAsync"];
+  setImportedProjectDefault: (projectId: string) => void;
+  setImporting: (importing: boolean) => void;
+  onSettled: () => void;
+  onContinue: () => void;
+}): Promise<void> {
+  setImporting(true);
+  let lastImportedProjectId: string | null = null;
+  try {
+    for (const repo of repos) {
+      if (!lifetime.active) return;
+      const project = await createProject({
+        name: repo.name,
+        source: { type: "local_path", hostId, path: repo.path },
+      });
+      lastImportedProjectId = project.id;
+    }
+  } catch {
+    return;
+  } finally {
+    if (lifetime.active) {
+      if (lifetime.canSelect && lastImportedProjectId !== null) {
+        setImportedProjectDefault(lastImportedProjectId);
+      }
+      setImporting(false);
+      onSettled();
+    }
+  }
+  if (lifetime.active) onContinue();
+}
+
 export function useOnboardingProjectImport({
   entry,
   onContinue,
@@ -17,9 +66,7 @@ export function useOnboardingProjectImport({
   const createProject = useCreateProject();
   const setImportedProjectDefault = useImportedProjectDefault();
   const draft = usePromptDraftController({ kind: "new-thread" });
-  const lifetimeRef = useRef<{ active: boolean; canSelect: boolean } | null>(
-    null,
-  );
+  const lifetimeRef = useRef<ProjectImportLifetime | null>(null);
   const [importing, setImporting] = useState(false);
 
   useEffect(() => {
@@ -46,29 +93,16 @@ export function useOnboardingProjectImport({
   ) => {
     const lifetime = lifetimeRef.current;
     if (importing || !lifetime?.active) return;
-    setImporting(true);
-    let lastImportedProjectId: string | null = null;
-    try {
-      for (const repo of repos) {
-        if (!lifetime.active) return;
-        const project = await createProject.mutateAsync({
-          name: repo.name,
-          source: { type: "local_path", hostId, path: repo.path },
-        });
-        lastImportedProjectId = project.id;
-      }
-    } catch {
-      return;
-    } finally {
-      if (lifetime.active) {
-        if (lifetime.canSelect && lastImportedProjectId !== null) {
-          setImportedProjectDefault(lastImportedProjectId);
-        }
-        setImporting(false);
-        onSettled();
-      }
-    }
-    if (lifetime.active) onContinue();
+    await runProjectImport({
+      lifetime,
+      hostId,
+      repos,
+      createProject: createProject.mutateAsync,
+      setImportedProjectDefault,
+      setImporting,
+      onSettled,
+      onContinue,
+    });
   };
 
   return { importing, importProjects };

@@ -1,11 +1,11 @@
 import {
-  usePluginSlots,
+  usePluginSlotKind,
   type PluginSettingsSectionSlot,
 } from "@/lib/plugin-slots";
 import { PluginSlotMount } from "./PluginSlotMount";
 
 export function PluginSettingsSections({ pluginId }: { pluginId: string }) {
-  const { settingsSections } = usePluginSlots();
+  const settingsSections = usePluginSlotKind("settingsSections");
   const sections = settingsSections.filter(
     (section) =>
       section.pluginId === pluginId && section.experimental_page === undefined,
@@ -19,7 +19,7 @@ export function PluginMobileSettingsSections({
 }: {
   pluginId: string | null;
 }) {
-  const { settingsSections } = usePluginSlots();
+  const settingsSections = usePluginSlotKind("settingsSections");
   const sections = settingsSections.filter(
     (section) =>
       section.experimental_page === "mobile" && section.pluginId === pluginId,

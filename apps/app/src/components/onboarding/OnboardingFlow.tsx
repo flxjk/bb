@@ -16,7 +16,7 @@ import {
 import { ProjectPathDialog } from "@/components/dialogs/ProjectPathDialog";
 import { PluginSettingsSections } from "@/components/plugin/PluginSettingsSections";
 import { PluginSetupGuideSections } from "@/components/plugin/PluginSetupGuideSections";
-import { usePluginSlots } from "@/lib/plugin-slots";
+import { usePluginSlotKind } from "@/lib/plugin-slots";
 import {
   buildProviderCliIssue,
   hasProviderCliAction,
@@ -30,6 +30,7 @@ import { ThreadTerminalView } from "@/components/thread/terminal/ThreadTerminalV
 import { appToast } from "@/components/ui/app-toast";
 import { setToasterCompactPlacement } from "@/components/ui/app-toast-runtime";
 import { restartSystemProviderStatesLoad } from "@/hooks/cache-owners/system-cache-effects";
+import { useRefetchAfterFirstLoad } from "./useRefetchAfterFirstLoad";
 import {
   useHostDiscoveredRepos,
   useHosts,
@@ -48,6 +49,8 @@ import {
   hostProviderCliStatusQueryOptions,
   useHostProviderCliStatus,
   useSystemConfig,
+  useHostProviderStatesAsTheyLoad,
+  useSystemProviderCatalog,
   useSystemProviderStates,
   useSystemProviders,
 } from "@/hooks/queries/system-queries";
@@ -79,6 +82,7 @@ import {
   OnboardingPluginGridSkeleton,
   ProjectsStep,
   RedesignedDevicesStep,
+  type AgentLoadingRow,
   type OnboardingAgent,
   type OnboardingRepo,
 } from "./OnboardingViews";
@@ -94,6 +98,8 @@ import {
   defaultSelectedRepoPaths,
   agentContinueDisabled,
   ONBOARDING_PLUGIN_ENTRY_IDS,
+  agentRowsSoFar,
+  type AgentRowSoFar,
   hasReadyAgent,
   projectsPrimaryAction,
   resolveAgentSetupState,
@@ -377,12 +383,14 @@ function AgentStepContainer({
   redesign,
   hostId,
   hostName,
+  loadRecords,
   onContinue,
 }: {
   chrome: StepChrome;
   redesign: boolean;
   hostId: string | null;
   hostName: string | null;
+  loadRecords: StepLoadRecords;
   onContinue: () => void;
 }) {
   const statesQuery = useSystemProviderStates({
@@ -440,14 +448,16 @@ function AgentStepContainer({
     }),
     [closeTerminalMutate, createTerminalAsync],
   );
+  const statesRefresh = useRefetchAfterFirstLoad({
+    loaded: states !== undefined || statesQuery.isError,
+    settledAt: Math.max(statesQuery.dataUpdatedAt, statesQuery.errorUpdatedAt),
+    refetch: refetchProviderStates,
+  });
   const signIns = useAgentSignIns({
     redesign,
     hostId,
-    states,
-    statesSettledAt: Math.max(
-      statesQuery.dataUpdatedAt,
-      statesQuery.errorUpdatedAt,
-    ),
+    states: shownStates,
+    statesSettledAt: statesRefresh.settledAt,
     isLocalHost: redesign
       ? (targetHostId) =>
           signInBrowserIsOnMachine({
@@ -457,7 +467,7 @@ function AgentStepContainer({
           })
       : isLocalDaemonHost,
     terminals: signInTerminals,
-    refetchStates: refetchProviderStates,
+    refetchStates: statesRefresh.refetch,
   });
   const startSignIn = signIns.start;
 
@@ -497,31 +507,19 @@ function AgentStepContainer({
   const [awaitingInstallInfoIds, setAwaitingInstallInfoIds] = useState<
     ReadonlySet<string>
   >(() => new Set());
-  const loadInstallInfo = async (
-    targetHostId: string,
-    providerId: string,
-  ): Promise<ProviderCliStatusResponse | undefined> => {
-    setAwaitingInstallInfoIds((ids) => new Set(ids).add(providerId));
-    try {
-      return await queryClient.fetchQuery(
-        hostProviderCliStatusQueryOptions({ hostId: targetHostId }),
-      );
-    } catch {
-      return undefined;
-    } finally {
-      setAwaitingInstallInfoIds((ids) => {
-        const next = new Set(ids);
-        next.delete(providerId);
-        return next;
-      });
-    }
-  };
 
   const startInstall = async (providerId: string) => {
     if (hostId === null) return;
     const installInfo =
       cliStatusQuery.data ??
-      (redesign ? await loadInstallInfo(hostId, providerId) : undefined);
+      (redesign
+        ? await loadInstallInfo(
+            queryClient,
+            hostId,
+            providerId,
+            setAwaitingInstallInfoIds,
+          )
+        : undefined);
     const status = installInfo?.[providerId];
     if (status === undefined) return;
     const issue = buildProviderCliIssue({ provider: providerId, status });
@@ -538,13 +536,17 @@ function AgentStepContainer({
     openProviderCliInstallLog(failure.logDialogState);
   };
 
-  const agents: OnboardingAgent[] | null =
-    hostId === null || states === undefined
+  const agents: (OnboardingAgent | AgentLoadingRow)[] | null =
+    hostId === null || rows === undefined
       ? null
-      : states.map((health) => {
-          const info = providersQuery.data?.find(
-            (provider) => provider.id === health.providerId,
-          );
+      : rows.map((row) => {
+          if (row.kind === "loading") return { loadingKey: row.key };
+          const health = row.state;
+          const info =
+            providersQuery.data?.find(
+              (provider) => provider.id === health.providerId,
+            ) ??
+            catalogQuery.data?.find((entry) => entry.id === health.providerId);
           const jobKey = providerCliJobKey(hostId, health.providerId);
           const signIn = signIns.signIns.get(health.providerId) ?? null;
           const starting =
@@ -641,11 +643,6 @@ function AgentStepContainer({
 
   const agentReady = hasReadyAgent(states);
   const agentBlocked = agents === null ? statesQuery.isError : !agentReady;
-  const statesLoadFailed =
-    redesign &&
-    hostId !== null &&
-    states === undefined &&
-    (statesQuery.isError || statesLoad.timedOut);
   return (
     <OnboardingLayout
       {...chrome}
@@ -885,6 +882,57 @@ function ProjectsStepContainer({
   );
 }
 
+async function loadInstallInfo(
+  queryClient: QueryClient,
+  targetHostId: string,
+  providerId: string,
+  setAwaitingInstallInfoIds: Dispatch<SetStateAction<ReadonlySet<string>>>,
+): Promise<ProviderCliStatusResponse | undefined> {
+  setAwaitingInstallInfoIds((ids) => new Set(ids).add(providerId));
+  try {
+    return await queryClient.fetchQuery(
+      hostProviderCliStatusQueryOptions({ hostId: targetHostId }),
+    );
+  } catch {
+    return undefined;
+  } finally {
+    setAwaitingInstallInfoIds((ids) => {
+      const next = new Set(ids);
+      next.delete(providerId);
+      return next;
+    });
+  }
+}
+
+async function applyPluginToggle(
+  next: boolean,
+  {
+    changePlugin,
+    onChanged,
+    setTarget,
+    setWorking,
+    showFailure,
+  }: {
+    changePlugin: (enabled: boolean) => Promise<unknown>;
+    onChanged: () => Promise<void>;
+    setTarget: (target: boolean | null) => void;
+    setWorking: (working: boolean) => void;
+    showFailure: (error: unknown) => void;
+  },
+): Promise<void> {
+  setTarget(next);
+  setWorking(true);
+  try {
+    await changePlugin(next);
+    await onChanged();
+  } catch (error) {
+    setTarget(null);
+    showFailure(error);
+  } finally {
+    setWorking(false);
+  }
+}
+
 function PluginCardContainer({
   entry,
   compact,
@@ -934,17 +982,13 @@ function PluginCardContainer({
       });
       return;
     }
-    setTarget(next);
-    setWorking(true);
-    try {
-      await changePlugin(next);
-      await onChanged();
-    } catch (error) {
-      setTarget(null);
-      showFailure(error);
-    } finally {
-      setWorking(false);
-    }
+    await applyPluginToggle(next, {
+      changePlugin,
+      onChanged,
+      setTarget,
+      setWorking,
+      showFailure,
+    });
   };
 
   return (
@@ -977,6 +1021,7 @@ function PluginsStepContainer({
   chrome,
   setupGuide,
   switches,
+  loadRecords,
   onBack,
   onContinue,
   onSkip,
@@ -984,6 +1029,7 @@ function PluginsStepContainer({
   chrome: StepChrome;
   setupGuide: SetupGuide;
   switches: OnboardingPluginSwitches;
+  loadRecords: StepLoadRecords;
   onBack: () => void;
   onContinue: () => void;
   onSkip: () => void;
@@ -1101,9 +1147,9 @@ function DevicesStepContainer({
     (host) => host.id !== hostId,
   ).length;
   const connect = connectAccessUrl(configQuery.data?.serverAccess);
-  const connectContributesSection = usePluginSlots().setupGuideSections.some(
-    (section) => section.pluginId === CONNECT_PLUGIN_ID,
-  );
+  const connectContributesSection = usePluginSlotKind(
+    "setupGuideSections",
+  ).some((section) => section.pluginId === CONNECT_PLUGIN_ID);
   const showMachines = devicesShowMachines(connect);
   const addMachine = () => setAddMachineOpen(true);
   const closeAddMachine = () => {
@@ -1216,6 +1262,7 @@ export function OnboardingFlow({
   });
   const agentStates = agentStatesQuery.data?.providers;
   const pluginSwitches = useOnboardingPluginSwitches();
+  const [loadRecords] = useState<StepLoadRecords>(() => new Map());
   const finishedRef = useRef(false);
   useEffect(() => {
     if (!closing) finishedRef.current = false;
@@ -1257,6 +1304,7 @@ export function OnboardingFlow({
           redesign={redesign}
           hostId={hostId}
           hostName={primaryHost?.name ?? null}
+          loadRecords={loadRecords}
           onContinue={advance(
             hasReadyAgent(agentStates) ? "completed" : "skipped",
           )}
@@ -1281,6 +1329,7 @@ export function OnboardingFlow({
           chrome={chrome}
           setupGuide={setupGuide}
           switches={pluginSwitches}
+          loadRecords={loadRecords}
           onBack={goTo(-1)}
           onContinue={advance("completed")}
           onSkip={advance("skipped")}

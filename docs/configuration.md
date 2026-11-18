@@ -52,10 +52,11 @@ children inherit those entries. Restart bb after changing these settings;
 existing sockets and workers keep their startup configuration.
 
 Built-in proxy support requires Node 22.21+ or 24.5+ (or Node 26); on older
-supported Node releases the launcher omits `--use-env-proxy`. Libraries that create their own agents
-or sockets can also bypass Node's global proxy support, including daemon
-WebSockets; these launch defaults do not configure those libraries or the OS
-proxy settings.
+supported Node releases the launcher omits `--use-env-proxy`. The daemon's
+server WebSocket and bb connect tunnel use Node's global agents, so they follow
+the same proxy and `NO_PROXY` settings. Libraries that create their own agents
+or sockets can still bypass Node's global proxy support; these launch defaults
+do not configure those libraries or the OS proxy settings.
 
 ## Host executable discovery
 
@@ -253,9 +254,9 @@ change the host-daemon protocol.
 | `BB_SETUP_GUIDE_VARIANT`       | Environment                                        | Startup-only QA         | `control` (the default) or `new` forces the first-run setup guide variant. See [General settings](#general-settings).                                                                                                                                                      |
 | `BB_PERF_DIAGNOSTICS`          | `bb-app env`, environment, or `--perf-diagnostics` | Startup-only            | Default false. Permits the `performanceDiagnostics` experiment; see [Experiments](#experiments).                                                                                                                                                                           |
 | `BB_QUERY_PLAN_AUDIT`          | Environment                                        | Startup-only debugging  | Default false. `1` logs `Slow SQLite query plan` for each query whose plan walks a large table or picks a weaker index; see [diagnostics](debugging-and-qa.md#slow-sqlite-query-plans). `pnpm dev`, `pnpm start:worktree`, and `pnpm desktop:worktree` default it to `1`. The `performanceDiagnostics` experiment also turns it on. |
-| `BB_CLI_ERROR_LOG`             | Environment of the `bb` process                    | Optional                | `0` stops the CLI recording failed invocations (command path, error code, no argument values) to `<dataDir>/logs/cli-errors.jsonl`. See `bb guide overview`.                                                                                                               |
-| `BB_ACCOUNT_POOL_PARENT_URL`   | Set automatically by a parent bb server            | Nested bb servers       | Account Pooler hub of the bb server whose thread launched this one. When present the Account Pooler plugin is enabled on first run and proxies to that parent; `bb pool parent isolate` opts out. Not a `bb-app config` key.                                               |
-| `BB_ACCOUNT_POOL_PARENT_TOKEN` | Set automatically by a parent bb server            | Nested bb servers       | Machine token this nested server presents to the parent hub. Both parent variables must be well formed or proxying stays off.                                                                                                                                              |
+| `BB_CLI_ERROR_LOG`             | Environment of the `bb` process                    | Optional                | `0` stops the CLI recording failed invocations (command path, error code, no argument values) to `<dataDir>/logs/cli-errors.jsonl`. See `bb guide overview`.                                                                                                                                                                        |
+| `BB_ACCOUNT_POOL_PARENT_URL`   | Set automatically by a parent bb server            | Nested bb servers       | Account Pooler hub of the bb server whose thread launched this one. When present the Account Pooler plugin is enabled on first run and proxies to that parent; `bb pool parent isolate` opts out. Not a `bb-app config` key.                                                                                                        |
+| `BB_ACCOUNT_POOL_PARENT_TOKEN` | Set automatically by a parent bb server            | Nested bb servers       | Machine token this nested server presents to the parent hub. Both parent variables must be well formed or proxying stays off.                                                                                                                                                                                                       |
 
 BB accepts request hosts that are `localhost`, IP addresses (including LAN and
 Tailscale IPs), or the hostname in `BB_APP_URL`. For a custom DNS name or
@@ -852,8 +853,8 @@ The `earlyAdopter` general setting (the Become an early adopter banner on
 Settings → Experiments, `bb settings general earlyAdopter on`) switches the
 shipped default to the early adopter default: experiments marked Early adopter
 (currently `agentCpuPriority`, `compactExpiredCache`, `dismissReadNotifications`,
-`pluginUpdates`, `skipFocusedThreadNotifications`, `threadRowMetadata`, and
-`updateWhenIdle`) turn on, and the rest stay off. An experiment you set yourself keeps your value
+`keyedPluginCss`, `pluginUpdates`, `skipFocusedThreadNotifications`,
+`threadRowMetadata`, and `updateWhenIdle`) turn on, and the rest stay off. An experiment you set yourself keeps your value
 either way.
 `/system/config` and `sdk.system.config()` return the resolved values in
 `experiments`.
@@ -885,6 +886,15 @@ either way.
   the background task; an older Android app in the foreground would list the
   silent push as a blank notification.
   The plugin reads it on each delivery and read, so a toggle applies live.
+- `keyedPluginCss` (on for early adopters) makes the app request each plugin's
+  stylesheet with `css-scope=plugin-attribute-v1`. bb then keys the plugin's
+  utilities on an attribute named after the plugin,
+  `data-bb-plugin-scope-<id>`, so style updates inside other plugins' UI, such
+  as the sidebar and composer, skip that plugin's rules. The app adds the
+  attribute to every element labeled `data-bb-plugin`, including ones a plugin
+  creates itself. The app reads the experiment when it loads a plugin's
+  stylesheet, so a toggle applies after a reload. See
+  [Plugin Stylesheet Version Skew](debugging-and-qa.md#plugin-stylesheet-version-skew).
 - `serverMove` enables Move server here in Settings → Machines,
   `bb server move`, `bb server export`, and old server copy deletion; while off
   those routes return 403 `server_move_experiment_disabled` (status and cancel
