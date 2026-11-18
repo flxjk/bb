@@ -6,7 +6,6 @@ import { upsertInstalledPlugin } from "@bb/db";
 import { createMigratedConnection } from "@bb/db/testing";
 import { createPluginService } from "../../src/services/plugins/plugin-service.js";
 import { createAiServiceRegistry } from "../../src/services/ai/ai-service-registry.js";
-import { createNoopTelemetryService } from "../../src/services/system/telemetry.js";
 import {
   nativePluginRequestSchema,
   nativePluginResultSchema,
@@ -27,7 +26,6 @@ async function execute(
   try {
     const service = createPluginService({
       aiServices: createAiServiceRegistry(),
-      telemetry: createNoopTelemetryService(),
       db,
       hub: {
         getDaemonSessionIdForHost: () => null,

@@ -759,13 +759,6 @@ async function sendThreadMessageWithoutContextClear(
         );
       },
     });
-    if (queuedRequest.activeThread) {
-      deps.hub.notifyThread(
-        thread.id,
-        ["status-changed"],
-        buildThreadStatusChangeMetadata(deps, queuedRequest.activeThread),
-      );
-    }
     return queuedRequest.request.sequence;
   }
 

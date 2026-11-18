@@ -13,7 +13,6 @@ import {
   setAutoAppUpdate,
   setDisabledPluginProviderCatalog,
   setDisabledProviderIds,
-  setPluginRecommendationId,
   setPluginSafeMode,
   setSkippedAppUpdate,
 } from "../../src/data/app-settings.js";
@@ -839,7 +838,6 @@ function seedSettings(db: DbConnection): void {
     ]);
   }
   for (let index = 0; index < 30; index += 1) {
-    setPluginRecommendationId(db, `plugin-${index}`, `recommendation-${index}`);
   }
   setSkippedAppUpdate(db, "2026.11.1");
   setAutoAppUpdate(db, true);

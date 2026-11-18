@@ -1,7 +1,6 @@
 import { defaultAppSettings, type ThreadEventType } from "@bb/domain";
 import { performance } from "node:perf_hooks";
 import {
-  deletePluginRecommendationId,
   forgetPluginProviders,
   getAiServiceSelections,
   getAppKeybindingOverrides,
@@ -9,7 +8,6 @@ import {
   getAutoAppUpdate,
   getDisabledPluginProviderCatalog,
   getDisabledProviderIds,
-  getPluginRecommendationId,
   getPluginSafeMode,
   getSkippedAppUpdate,
   isAppUpdateSendHoldSet,
@@ -20,7 +18,6 @@ import {
   setAutoAppUpdate,
   setDisabledPluginProviderCatalog,
   setDisabledProviderIds,
-  setPluginRecommendationId,
   setPluginSafeMode,
   setSkippedAppUpdate,
 } from "../../src/data/app-settings.js";
@@ -345,11 +342,6 @@ const SETTINGS_CASES: readonly Case[] = [
       ]),
   },
   {
-    name: `${APP_SETTINGS}#setPluginRecommendationId`,
-    run: (db) =>
-      setPluginRecommendationId(db, "plugin-0", "recommendation-next"),
-  },
-  {
     name: `${APP_SETTINGS}#setSkippedAppUpdate`,
     run: (db) => setSkippedAppUpdate(db, "2026.11.2"),
   },
@@ -384,14 +376,6 @@ const SETTINGS_CASES: readonly Case[] = [
           `${BUSIEST_PLUGIN_ID}-reviewer`,
         ]),
       ),
-  },
-  {
-    name: `${APP_SETTINGS}#getPluginRecommendationId`,
-    run: (db) => getPluginRecommendationId(db, "plugin-0"),
-  },
-  {
-    name: `${APP_SETTINGS}#deletePluginRecommendationId`,
-    run: (db) => deletePluginRecommendationId(db, "plugin-0"),
   },
   {
     name: `${APP_SETTINGS}#isAppUpdateSendHoldSet`,

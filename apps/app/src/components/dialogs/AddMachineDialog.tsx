@@ -33,7 +33,10 @@ import { sdk } from "@/lib/sdk";
 import { useClipboardCopy } from "@/lib/clipboard";
 import { Link } from "react-router-dom";
 import { getSettingsMachineRoutePath } from "@/lib/route-paths";
-import { getMutationErrorMessage } from "@/lib/mutation-errors";
+import {
+  getMutationErrorMessage,
+  isAbortLikeError,
+} from "@/lib/mutation-errors";
 
 const MANUAL_MACHINE_PROVIDER_ID = "manual";
 
@@ -44,12 +47,16 @@ export class MachineEnrollmentEndedError extends Error {
   }
 }
 
+type EnrollmentFailureHandler = (error: unknown) => void;
+
 export function AddMachineDialog({
   open,
   onOpenChange,
+  onEnrollmentFailed,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEnrollmentFailed?: EnrollmentFailureHandler;
 }) {
   const hosts = useHosts();
   const close = (next: boolean) => {
@@ -59,7 +66,12 @@ export function AddMachineDialog({
   return (
     <Dialog open={open} onOpenChange={close} modal={false}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
-        {open && <AddMachineContent onOpenChange={close} />}
+        {open && (
+          <AddMachineContent
+            onOpenChange={close}
+            onEnrollmentFailed={onEnrollmentFailed}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -67,8 +79,10 @@ export function AddMachineDialog({
 
 export function AddMachineContent({
   onOpenChange,
+  onEnrollmentFailed,
 }: {
   onOpenChange: (open: boolean) => void;
+  onEnrollmentFailed?: EnrollmentFailureHandler | undefined;
 }) {
   const config = useSystemConfig();
   const hosts = useHosts();
@@ -95,6 +109,7 @@ export function AddMachineContent({
     <ManualMachineSetup
       serverMachineName={serverMachineName}
       onOpenChange={onOpenChange}
+      onEnrollmentFailed={onEnrollmentFailed}
     />
   );
 }
@@ -308,6 +323,10 @@ function useManualMachineEnrollment(
       createKey.current = null;
       setConnectedHost(host);
     },
+    onError: (error) => {
+      if (!mountedRef.current || isAbortLikeError(error)) return;
+      onFailedRef.current?.(error);
+    },
   });
   const start = createMachine.mutate;
   useEffect(() => {
@@ -331,11 +350,13 @@ function useManualMachineEnrollment(
 export function ManualMachineSetup({
   serverMachineName,
   onOpenChange,
+  onEnrollmentFailed,
 }: {
   serverMachineName: string | null;
   onOpenChange: (open: boolean) => void;
+  onEnrollmentFailed?: EnrollmentFailureHandler | undefined;
 }) {
-  const enrollment = useManualMachineEnrollment();
+  const enrollment = useManualMachineEnrollment(onEnrollmentFailed);
   return (
     <ManualMachineSetupView
       command={enrollment.command}
@@ -349,8 +370,12 @@ export function ManualMachineSetup({
   );
 }
 
-export function AddMachineInline() {
-  const enrollment = useManualMachineEnrollment();
+export function AddMachineInline({
+  onEnrollmentFailed,
+}: {
+  onEnrollmentFailed?: EnrollmentFailureHandler;
+}) {
+  const enrollment = useManualMachineEnrollment(onEnrollmentFailed);
   return (
     <QuickMachineSetupView
       command={enrollment.command}
